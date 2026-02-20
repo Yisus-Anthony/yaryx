@@ -1,0 +1,17 @@
+.form{ display:grid; gap: 12px; }
+.row{ display:grid; gap: 6px; }
+.label{ font-weight: 700; color: rgba(255,255,255,.84); }
+.input{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.03);
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 12px;
+  outline: none;
+}
+.input:focus{
+  border-color: rgba(184,255,72,.32);
+  box-shadow: 0 0 0 4px rgba(184,255,72,.08);
+}
+.textarea{ resize: vertical; min-height: 140px; }
+.hint{ margin: 6px 0 0; color: rgba(255,255,255,.55); font-size: 12px; }
