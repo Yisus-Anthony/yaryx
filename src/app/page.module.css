@@ -1,0 +1,86 @@
+.hero {
+  display: grid;
+  gap: 18px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: 34px;
+  line-height: 1.1;
+}
+
+.subtitle {
+  margin: 0 0 18px;
+  color: var(--muted);
+  max-width: 65ch;
+}
+
+.ctaRow {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ctaAnimation {
+  display: inline-flex;
+  align-items: center;
+  animation: glowBreathe 2.2s ease-in-out infinite;
+  will-change: transform, box-shadow;
+}
+
+@keyframes glowBreathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow:
+      0 0 0 3px rgba(99, 102, 241, 0.15),
+      0 12px 28px rgba(99, 102, 241, 0.25);
+  }
+}
+
+.surface {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.surface h3 {
+  margin: 0 0 6px;
+}
+
+.surface p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,14 @@
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 18px 16px;
+  margin-top: 24px;
+}
+.inner {
+  max-width: var(--maxW);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.muted { color: var(--muted); }

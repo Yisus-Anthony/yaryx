@@ -1,0 +1,16 @@
+:root {
+  --bg: #ffffff;
+  --surface: rgba(255, 255, 255, 0.06);
+  --text: rgba(21, 15, 15, 0.92);
+  --muted: rgba(21, 11, 11, 0.7);
+  --border: rgba(0, 0, 0, 0.14);
+
+  --primary: #aeaeb3be;
+  --primaryHover: #8f8e9a;
+
+  --radius: 14px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+  --maxW: 1100px;
+  --gap: 16px;
+}
