@@ -1,0 +1,95 @@
+.whatsappButton {
+    position: fixed;
+    right: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
+    width: 45px;
+    height: 45px;
+
+    background-color: #25d366;
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    cursor: pointer;
+    z-index: 1000;
+
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    /* Mobile polish */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+
+    /* Para el badge absoluto */
+    overflow: visible;
+}
+
+/* Hover solo en dispositivos con mouse/trackpad */
+@media (hover: hover) and (pointer: fine) {
+    .whatsappButton:hover {
+        transform: scale(1.08);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Accesibilidad: cuando navegas con teclado */
+.whatsappButton:focus-visible {
+    outline: 3px solid rgba(37, 211, 102, 0.45);
+    outline-offset: 4px;
+}
+
+.icon {
+    width: 32px;
+    height: 32px;
+}
+
+.badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+
+    background-color: #ff3b30;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    min-width: 20px;
+    height: 20px;
+
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6px;
+    border: 2px solid white;
+
+    line-height: 1;
+}
+
+/* Responsive: móvil */
+@media (max-width: 768px) {
+    .whatsappButton {
+        right: 16px;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        width: 45px;
+        height: 45px;
+    }
+
+    .icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .badge {
+        top: 1.5px;
+        right: 1.5px;
+        font-size: 11px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+    }
+}

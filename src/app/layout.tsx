@@ -1,5 +1,6 @@
 import "./globals.css";
 import Navbar from "../components/Navbar/Navbar";
+import WhatsAppButton from "../components/WhatsAppButton/WhatsAppButton";
 import Footer from "../components/Footer/Footer";
 
 export const metadata = {
@@ -22,6 +23,8 @@ export default function RootLayout({
         </main>
 
         <Footer />
+
+        <WhatsAppButton notificationCount={1} />
       </body>
     </html>
   );
