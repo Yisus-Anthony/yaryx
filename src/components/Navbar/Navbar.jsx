@@ -10,20 +10,20 @@ export default function Navbar() {
           MiApp
         </Link>
 
-        <nav className={styles.nav}>
-          <Link className={styles.navLink} href="/about">About</Link>
-          <Link className={styles.navLink} href="/contact">Contact</Link>
+        <nav className={styles.nav} aria-label="Primary navigation">
+          <Link className={styles.navLink} href="/about">
+            About
+          </Link>
+          <Link className={styles.navLink} href="/contact">
+            Contact
+          </Link>
         </nav>
 
         <div className={styles.actions}>
           <ButtonLink href="/contact" variant="ghost">
             Ir a Contacto
           </ButtonLink>
-          <ButtonLink
-            href="https://yaryx.com"
-            external
-            variant="primary"
-          >
+          <ButtonLink href="https://yaryx.com" external variant="primary">
             Yaryx
           </ButtonLink>
         </div>

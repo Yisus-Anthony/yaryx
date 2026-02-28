@@ -2,14 +2,19 @@
   position: sticky;
   top: 0;
   z-index: 10;
+
   backdrop-filter: blur(10px);
   background: rgba(203, 183, 183, 0.567);
   border-bottom: 1px solid var(--border);
+
+  /* iPhone notch/safe-area */
+  padding-top: env(safe-area-inset-top);
 }
 
 .inner {
   max-width: var(--maxW);
   margin: 0 auto;
+
   padding: 14px 16px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
@@ -17,21 +22,31 @@
   gap: var(--gap);
 }
 
+/* Brand / logo */
 .brand {
   font-weight: 800;
   letter-spacing: 0.4px;
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  color: var(--text);
 }
 
+/* Center nav (desktop) */
 .nav {
   display: flex;
   gap: 14px;
   justify-content: center;
+  align-items: center;
 }
 
 .navLink {
   padding: 10px 10px;
   border-radius: 10px;
   color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .navLink:hover {
@@ -39,26 +54,62 @@
   color: var(--text);
 }
 
+/* Right actions (desktop) */
 .actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  align-items: center;
+  flex-wrap: nowrap;
+  /* evita que se parta feo */
 }
 
-/* Responsive */
+/* ---------- Mobile ---------- */
 @media (max-width: 760px) {
   .inner {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    /* Arriba: brand + acciones | Abajo: nav */
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "nav nav";
+    gap: 10px;
+    padding: 10px 14px;
   }
 
-  .nav {
-    justify-content: flex-start;
-    flex-wrap: wrap;
+  .brand {
+    grid-area: brand;
   }
 
   .actions {
+    grid-area: actions;
+    gap: 8px;
+  }
+
+  .nav {
+    grid-area: nav;
     justify-content: flex-start;
-    flex-wrap: wrap;
+
+    /* si no cabe, scroll horizontal */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    /* Firefox */
+    padding-bottom: 2px;
+  }
+
+  .nav::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+  }
+
+  .navLink {
+    padding: 8px 10px;
+  }
+}
+
+/* Extra: ultra pequeño */
+@media (max-width: 380px) {
+  .inner {
+    padding: 10px 12px;
   }
 }
