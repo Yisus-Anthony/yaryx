@@ -7,15 +7,12 @@ export default function Navbar() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link className={styles.brand} href="/">
-          MiApp
+          Tu Refaccionaria
         </Link>
 
         <nav className={styles.nav} aria-label="Primary navigation">
           <Link className={styles.navLink} href="/about">
-            About
-          </Link>
-          <Link className={styles.navLink} href="/contact">
-            Contact
+            Noasotros
           </Link>
         </nav>
 

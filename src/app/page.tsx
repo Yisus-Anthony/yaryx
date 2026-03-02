@@ -8,10 +8,12 @@ export default function HomePage() {
   return (
     <section className={styles.hero}>
       <div className={styles.card}>
-        <h1 className={styles.title}>App Next.js mantenible y escalable</h1>
+        <h1 className={styles.title}>
+          En Tu Refaccionaria encontraras refacciones nuevas y usadas para tu
+          vehivulo
+        </h1>
         <p className={styles.subtitle}>
-          Componentes por feature + CSS Modules por componente + tokens globales
-          mínimos.
+          Marchas, Alternadores importados desde estados unidos
         </p>
 
         <div className={styles.ctaRow}>
@@ -33,20 +35,19 @@ export default function HomePage() {
 
       <div className={styles.grid}>
         <article className={styles.surface}>
-          <h3>Escalable</h3>
+          <h3>Conoce nuestros motores de arranque</h3>
+          <p>a los mejores precios nuevos y usados</p>
+        </article>
+        <article className={styles.surface}>
+          <h3>Hasta 50 % de descuento</h3>
           <p>
-            Crece por módulos: components/feature, app/routes, styles/tokens.
+            Pongase en contacto con nosotros y pregunte acerca de los
+            descuentos.
           </p>
         </article>
         <article className={styles.surface}>
-          <h3>Responsivo</h3>
-          <p>Grid/Flex + breakpoints claros y consistentes.</p>
-        </article>
-        <article className={styles.surface}>
-          <h3>Mantenible</h3>
-          <p>
-            Separación de responsabilidades: UI, rutas y estilos encapsulados.
-          </p>
+          <h3>Alternadores</h3>
+          <p>a los mejores precios nuevos y usados.</p>
         </article>
       </div>
     </section>

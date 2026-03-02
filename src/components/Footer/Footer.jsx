@@ -4,7 +4,7 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
-        <span>© {new Date().getFullYear()} MiApp</span>
+        <span>© {new Date().getFullYear()} Tu Refaccionaria</span>
         <span className={styles.muted}>Responsive · CSS Modules · Next.js</span>
       </div>
     </footer>

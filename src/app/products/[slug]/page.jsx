@@ -1,3 +1,4 @@
+import Link from "next/link";
 import styles from "./product.module.css";
 import { products } from "../../../data/products";
 import ProductGallery from "./ProductGallery";
@@ -11,6 +12,9 @@ export default async function ProductDetail({ params }) {
 
   return (
     <section className={styles.wrapper}>
+      <Link href="/products" className={styles.backButton}>
+        ← Volver a productos
+      </Link>
       <h1 className={styles.title}>{product.name}</h1>
       <p className={styles.subtitle}>Galería de fotos</p>
 

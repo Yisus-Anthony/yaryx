@@ -4,8 +4,8 @@ import WhatsAppButton from "../components/WhatsAppButton/WhatsAppButton";
 import Footer from "../components/Footer/Footer";
 
 export const metadata = {
-  title: "Mi App Next.js",
-  description: "App responsive con ES Modules y CSS Modules",
+  title: "Tu Refaccionaria",
+  description: "Encuentra refacciones nuevas y usadas para tu vehiculo",
 };
 
 export default function RootLayout({

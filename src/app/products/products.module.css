@@ -11,7 +11,7 @@
 .grid {
     display: grid;
     gap: 12px;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .card {
@@ -50,12 +50,71 @@
     font-size: 13px;
 }
 
+.backButton {
+    display: inline-block;
+    justify-self: start;
+    /* 👈 esto evita que se estire */
+    width: auto;
+    margin-bottom: 20px;
+    padding: 8px 14px;
+    background-color: #000;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.backButton:hover {
+    background-color: #333;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.pageBtn {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.pageBtn:hover {
+    background: #333;
+    transform: translateY(-1px);
+}
+
+.pageBtnDisabled {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+}
+
+.pageInfo {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
 @media (max-width: 900px) {
     .grid {
-        grid-template-columns: 1fr;
-    }
+        grid-template-columns: repeat(2, 1fr);
 
-    .thumb {
-        height: 220px;
     }
+}
+
+.thumb {
+    height: 240px;
+
 }
