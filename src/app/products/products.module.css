@@ -8,11 +8,21 @@
     font-size: 28px;
 }
 
+/* ================= GRID ================= */
+
 .grid {
     display: grid;
     gap: 12px;
     grid-template-columns: repeat(4, minmax(0, 1fr));
 }
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ================= CARD ================= */
 
 .card {
     border: 1px solid var(--border);
@@ -21,15 +31,30 @@
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: transform 0.12s ease;
+    text-decoration: none;
+    color: inherit;
 }
 
 .card:hover {
     transform: translateY(-2px);
 }
 
+/* ================= IMAGEN ================= */
+
+/* OPCIÓN RECTANGULAR */
+/*
+.thumb {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+*/
+/* SI QUIERES CUADRADAS PERFECTAS, USA ESTO EN VEZ DE LO DE ARRIBA */
+
 .thumb {
     width: 100%;
-    height: 180px;
+    aspect-ratio: 1 / 1;
     object-fit: cover;
     display: block;
 }
@@ -50,10 +75,11 @@
     font-size: 13px;
 }
 
+/* ================= BOTÓN ATRÁS ================= */
+
 .backButton {
     display: inline-block;
     justify-self: start;
-    /* 👈 esto evita que se estire */
     width: auto;
     margin-bottom: 20px;
     padding: 8px 14px;
@@ -68,6 +94,8 @@
 .backButton:hover {
     background-color: #333;
 }
+
+/* ================= PAGINACIÓN ================= */
 
 .pagination {
     display: flex;
@@ -107,14 +135,92 @@
     opacity: 0.8;
 }
 
-@media (max-width: 900px) {
-    .grid {
-        grid-template-columns: repeat(2, 1fr);
+/* ================= FILTROS HAMBURGUESA ================= */
 
-    }
+.filtersDrawer {
+    margin: 10px 0 16px;
 }
 
-.thumb {
-    height: 240px;
+.filtersBtn {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #000;
+    color: #fff;
+    font-size: 14px;
+}
 
+.filtersBtn::-webkit-details-marker {
+    display: none;
+}
+
+.filtersState {
+    opacity: 0.75;
+    font-size: 13px;
+}
+
+.filtersPanel {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: grid;
+    gap: 10px;
+}
+
+.filterRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.filterLabel {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.filterPill {
+    display: inline-block;
+    padding: 8px 12px;
+    border-radius: 999px;
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.filterPill:hover {
+    background: rgba(0, 0, 0, 0.14);
+}
+
+.activePill {
+    background: #000;
+    color: #fff;
+}
+
+.resultsInfo {
+    font-size: 14px;
+    opacity: 0.7;
+}
+
+.empty {
+    margin-top: 14px;
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.price {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #22c55e;
 }
