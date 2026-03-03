@@ -82,6 +82,23 @@
   opacity: 0.7;
 }
 
+.logo {
+  height: 32px;
+  /* altura visual uniforme */
+  width: auto;
+  /* mantiene proporción */
+  object-fit: contain;
+  display: block;
+}
+
+.payments {
+  display: flex;
+  align-items: center;
+  /* clave */
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .logo {

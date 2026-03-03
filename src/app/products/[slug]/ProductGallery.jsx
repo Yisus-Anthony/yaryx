@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import styles from "./product.module.css";
 
 export default function ProductGallery({ slug }) {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // modal
+  const [openIndex, setOpenIndex] = useState(-1);
+  const isOpen = openIndex >= 0;
 
   useEffect(() => {
     let alive = true;
@@ -29,44 +33,126 @@ export default function ProductGallery({ slug }) {
         }
 
         const data = await res.json();
-
         if (alive) setItems(data.items || []);
       } catch (e) {
-        if (alive) setError(e.message || "Error");
+        if (alive) setError(e?.message || "Error");
       } finally {
         if (alive) setLoading(false);
       }
     }
 
     run();
-
     return () => {
       alive = false;
     };
   }, [slug]);
 
+  const close = useCallback(() => setOpenIndex(-1), []);
+  const next = useCallback(() => {
+    setOpenIndex((i) => (i + 1) % items.length);
+  }, [items.length]);
+  const prev = useCallback(() => {
+    setOpenIndex((i) => (i - 1 + items.length) % items.length);
+  }, [items.length]);
+
+  // bloquear scroll + ESC + flechas
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft") prev();
+    };
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isOpen, close, next, prev]);
+
   if (loading) return <div className={styles.muted}>Cargando imágenes...</div>;
   if (error) return <div className={styles.error}>{error}</div>;
   if (!items.length) return <div className={styles.muted}>Sin imágenes</div>;
 
+  const active = isOpen ? items[openIndex] : null;
+
   return (
-    <div className={styles.grid}>
-      {items.map((img) => (
-        <a
-          key={img.id}
-          className={styles.item}
-          href={img.url}
-          target="_blank"
-          rel="noreferrer"
+    <>
+      <div className={styles.grid}>
+        {items.map((img, idx) => (
+          <button
+            key={img.id}
+            type="button"
+            className={styles.itemButton}
+            onClick={() => setOpenIndex(idx)}
+            aria-label={`Ver imagen ${idx + 1}`}
+          >
+            <img
+              className={styles.thumb}
+              src={img.url}
+              alt={img.publicId}
+              loading="lazy"
+            />
+          </button>
+        ))}
+      </div>
+
+      {isOpen && (
+        <div
+          className={styles.modalBackdrop}
+          role="dialog"
+          aria-modal="true"
+          onClick={close}
         >
-          <img
-            className={styles.thumb}
-            src={img.url}
-            alt={img.publicId}
-            loading="lazy"
-          />
-        </a>
-      ))}
-    </div>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className={styles.modalClose}
+              onClick={close}
+              aria-label="Cerrar"
+            >
+              ✕
+            </button>
+
+            {/* Opcional: botones navegación */}
+            {items.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className={styles.modalPrev}
+                  onClick={prev}
+                  aria-label="Anterior"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  className={styles.modalNext}
+                  onClick={next}
+                  aria-label="Siguiente"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            <img
+              className={styles.full}
+              src={active.url}
+              alt={active.publicId}
+              draggable={false}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }

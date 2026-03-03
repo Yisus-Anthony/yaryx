@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -14,7 +15,13 @@ export default function Footer() {
           <LogoAmex />
           <LogoPayPal />
           <LogoSpei />
-          <LogoMercadoPago />
+          <Image
+            src="/mercado-pago.png"
+            alt="Mercado Pago"
+            width={120}
+            height={40}
+            className={styles.logo}
+          />
         </div>
 
         {/* Social */}
@@ -238,79 +245,30 @@ function LogoSpei() {
   );
 }
 
-function LogoMercadoPago() {
+function LogoOxxo() {
   return (
-    <SvgWrap title="Mercado Pago" className={styles.logo}>
-      <rect
-        x="0"
-        y="0"
-        width="120"
-        height="40"
-        rx="8"
-        fill="currentColor"
-        opacity="0.06"
-      />
+    <SvgWrap title="OXXO" className={styles.logo}>
+      {/* Fondo rojo */}
+      <rect x="0" y="0" width="120" height="40" rx="8" fill="#E30613" />
 
-      {/* Isotipo */}
-      <g transform="translate(10,8)">
-        {/* Óvalo base */}
-        <ellipse cx="16" cy="12" rx="16" ry="12" fill="#009EE3" />
+      {/* Borde amarillo superior */}
+      <rect x="0" y="0" width="120" height="6" fill="#F5A300" />
 
-        {/* Parte superior más clara */}
-        <path
-          d="M2 9
-             C6 3, 26 3, 30 9
-             L30 10
-             C26 6, 6 6, 2 10 Z"
-          fill="#35B4F0"
-        />
+      {/* Borde amarillo inferior */}
+      <rect x="0" y="34" width="120" height="6" fill="#F5A300" />
 
-        {/* Manos más simétricas */}
-        <path
-          d="M6 15
-             C8 13, 10 12, 12 12
-             L14 12
-             C15 12, 16 13, 17 13
-             L19 14
-             C20 15, 21 15, 22 15
-             L26 15
-             C27 15, 28 16, 28 17
-             C28 18, 27 19, 26 19
-             L22 19
-             C21 19, 20 18.5, 19 17.5
-             L18 16.5
-             C17 15.5, 16 15.5, 15 15.5
-             L13 15.5
-             C12 15.5, 10 16.5, 8 17.5
-             L7 18.5
-             C6 18.5, 5 17.8, 5 17
-             C5 16.2, 5.5 15.5, 6 15 Z"
-          fill="#FFFFFF"
-        />
-      </g>
-
-      {/* Texto */}
+      {/* Texto OXXO estilizado */}
       <text
-        x="80"
-        y="18"
+        x="60"
+        y="27"
         textAnchor="middle"
-        fontSize="13"
-        fontWeight="700"
-        fontFamily="Helvetica, Arial, sans-serif"
-        fill="#003087"
+        fontSize="26"
+        fontWeight="900"
+        fontFamily="Arial Black, Impact, sans-serif"
+        fill="#FFFFFF"
+        letterSpacing="2"
       >
-        mercado
-      </text>
-      <text
-        x="80"
-        y="30"
-        textAnchor="middle"
-        fontSize="13"
-        fontWeight="700"
-        fontFamily="Helvetica, Arial, sans-serif"
-        fill="#003087"
-      >
-        pago
+        OXXO
       </text>
     </SvgWrap>
   );

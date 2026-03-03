@@ -61,6 +61,76 @@
     transform: translateY(-1px);
 }
 
+.itemButton {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    display: block;
+}
+
+.modalBackdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    display: grid;
+    place-items: center;
+    padding: 12px;
+}
+
+.modalContent {
+    width: 90vw;
+    height: 85vh;
+    display: grid;
+    place-items: center;
+}
+
+.full {
+    max-width: 90vw;
+    max-height: 85vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.modalClose {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: 0;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+
+.modalPrev,
+.modalNext {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 28px;
+    line-height: 44px;
+}
+
+.modalPrev {
+    left: 8px;
+}
+
+.modalNext {
+    right: 8px;
+}
+
 @media (max-width: 900px) {
     .grid {
         grid-template-columns: repeat(3, 1fr);
