@@ -9,7 +9,7 @@ export const products = [
         price: 2500,
     },
     {
-        slug: "Motor de arranque",
+        slug: "motor-de-arranque",
         name: "Motor de arranque",
         folder: "product/alternadores/1",
         coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
@@ -18,7 +18,7 @@ export const products = [
         price: 3800,
     },
     {
-        slug: "Alternador 2",
+        slug: "Alternado2r",
         name: "Alternador 2",
         folder: "product/alternadores/1",
         coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
@@ -27,7 +27,7 @@ export const products = [
         price: 2200,
     },
     {
-        slug: "Motor de arranque 2",
+        slug: "motor-de-arranque2",
         name: "Motor de arranque",
         folder: "product/alternadores/1",
         coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
@@ -36,7 +36,7 @@ export const products = [
         price: 4100,
     },
     {
-        slug: "Motor de arranque3",
+        slug: "motor-de-arranque3",
         name: "Motor de arranque",
         folder: "product/alternadores/1",
         coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
@@ -45,7 +45,7 @@ export const products = [
         price: 1800,
     },
     {
-        slug: "Motor de arranque4",
+        slug: "motor-de-arranque4",
         name: "Motor de arranque",
         folder: "product/alternadores/1",
         coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
@@ -54,12 +54,12 @@ export const products = [
         price: 2000,
     },
     {
-        slug: "Motor de arranque5",
-        name: "Motor de arranque",
-        folder: "product/alternadores/1",
-        coverPublicId: "product/alternadores/1/IMG_1171_zeie4t",
-        condition: "usado",
+        slug: "borne-negativo-para-marcha-42-mt",
+        name: "Borne negativo para marcha 42 mt",
+        folder: "product/motores de arranque/marcha 42mt refacciones/borne negativo para marcha 42 mt",
+        coverPublicId: "product/motores de arranque/marcha 42mt refacciones/borne negativo para marcha 42 mt/IMG_1246_kcxjrk",
+        condition: "nuevo",
         category: "motor de arranque",
-        price: 1950,
+        price: 150,
     },
 ];
