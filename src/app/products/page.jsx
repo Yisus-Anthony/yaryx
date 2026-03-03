@@ -114,6 +114,18 @@ export default function ProductsPage({ searchParams }) {
             >
               Usados
             </Link>
+            <Link
+              className={`${styles.filterPill} ${
+                condition === "usado" ? styles.activePill : ""
+              }`}
+              href={buildUrl({
+                page: 1,
+                condition: "remanofacturado",
+                category,
+              })}
+            >
+              remanofacturado
+            </Link>
           </div>
 
           {/* Categoría */}

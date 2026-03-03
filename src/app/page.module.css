@@ -38,6 +38,8 @@
 .ctaAnimation {
   display: inline-flex;
   align-items: center;
+  border-radius: 999px;
+  /* ← esto lo hace redondo */
   animation: glowBreathe 2.2s ease-in-out infinite;
   will-change: transform, box-shadow;
 }

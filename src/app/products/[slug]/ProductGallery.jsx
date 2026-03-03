@@ -3,6 +3,16 @@
 import { useEffect, useState, useCallback } from "react";
 import styles from "./product.module.css";
 
+function cldThumb(publicId) {
+  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto:eco,w_350,c_fill/${publicId}`;
+}
+
+function cldFull(publicId) {
+  const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto:good,w_1400,c_fit/${publicId}`;
+}
+
 export default function ProductGallery({ slug }) {
   const [items, setItems] = useState([]);
   const [error, setError] = useState("");
@@ -94,7 +104,7 @@ export default function ProductGallery({ slug }) {
           >
             <img
               className={styles.thumb}
-              src={img.url}
+              src={cldThumb(img.publicId)}
               alt={img.publicId}
               loading="lazy"
             />
@@ -122,7 +132,6 @@ export default function ProductGallery({ slug }) {
               ✕
             </button>
 
-            {/* Opcional: botones navegación */}
             {items.length > 1 && (
               <>
                 <button
@@ -146,7 +155,7 @@ export default function ProductGallery({ slug }) {
 
             <img
               className={styles.full}
-              src={active.url}
+              src={cldFull(active.publicId)}
               alt={active.publicId}
               draggable={false}
             />

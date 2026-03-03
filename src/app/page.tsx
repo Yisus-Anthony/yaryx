@@ -25,7 +25,7 @@ export default function HomePage() {
           <ButtonLink href="/about" variant="ghost">
             Sobre nosotros
           </ButtonLink>
-          <div className={styles.ctaAnimation}>
+          <div>
             <ButtonLink href="https://yaryx.com" external variant="ghost">
               Haz crecer tu negocio
             </ButtonLink>
