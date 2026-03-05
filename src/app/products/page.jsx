@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { products } from "../../data/products";
 import styles from "./products.module.css";
 
 function cldUrl(publicId) {
@@ -9,49 +8,43 @@ function cldUrl(publicId) {
 
 const PAGE_SIZE = 20;
 
-export default function ProductsPage({ searchParams }) {
-  // ---- params desde la URL ----
+async function getProducts({ page, condition, category }) {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("pageSize", String(PAGE_SIZE));
+  if (condition && condition !== "all") params.set("condition", condition);
+  if (category && category !== "all") params.set("category", category);
+
+  // URL base robusta (dev/prod)
+  const base =
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
+
+  const res = await fetch(`${base}/api/products?${params.toString()}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error("No se pudieron cargar productos");
+  return res.json();
+}
+
+export default async function ProductsPage({ searchParams }) {
   const pageParam = Number(searchParams?.page ?? "1");
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
-  // "all" | "nuevo" | "usado"
   const condition = (searchParams?.condition ?? "all").toLowerCase();
-
-  // "all" | cualquier categoría
   const category = (searchParams?.category ?? "all").toLowerCase();
 
-  // ---- categorías disponibles (auto) ----
-  const categories = Array.from(
-    new Set(
-      products
-        .map((p) => (p.category ?? "").toString().trim().toLowerCase())
-        .filter(Boolean),
-    ),
-  ).sort();
-
-  // ---- filtrar productos ----
-  const filtered = products.filter((p) => {
-    const pCondition = (p.condition ?? "").toString().trim().toLowerCase();
-    const pCategory = (p.category ?? "").toString().trim().toLowerCase();
-
-    const okCondition = condition === "all" ? true : pCondition === condition;
-    const okCategory = category === "all" ? true : pCategory === category;
-
-    return okCondition && okCategory;
-  });
-
-  // ---- paginar sobre filtered ----
-  const total = filtered.length;
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const currentPage = Math.min(page, totalPages);
-
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const visible = filtered.slice(start, start + PAGE_SIZE);
+  const data = await getProducts({ page, condition, category });
+  const visible = data.items || [];
+  const total = data.total || 0;
+  const totalPages = data.totalPages || 1;
+  const currentPage = data.page || 1;
 
   const prevPage = currentPage > 1 ? currentPage - 1 : null;
   const nextPage = currentPage < totalPages ? currentPage + 1 : null;
 
-  // ---- helper para construir URLs conservando filtros ----
   function buildUrl(next) {
     const params = new URLSearchParams();
 
@@ -65,6 +58,14 @@ export default function ProductsPage({ searchParams }) {
     return qs ? `/products?${qs}` : "/products";
   }
 
+  // categorías básicas: derivadas de los visibles
+  // (si quieres categorías globales, te paso el cambio en la API)
+  const categories = Array.from(
+    new Set(visible.map((p) => (p.category || "").toLowerCase())),
+  )
+    .filter(Boolean)
+    .sort();
+
   return (
     <section className={styles.wrapper}>
       <Link href="/" className={styles.backButton}>
@@ -73,7 +74,6 @@ export default function ProductsPage({ searchParams }) {
 
       <h1 className={styles.title}>Productos</h1>
 
-      {/* BOTÓN / MENÚ DE FILTROS */}
       <details className={styles.filtersDrawer}>
         <summary className={styles.filtersBtn}>
           ☰ Filtros
@@ -84,7 +84,6 @@ export default function ProductsPage({ searchParams }) {
         </summary>
 
         <div className={styles.filtersPanel}>
-          {/* Condición */}
           <div className={styles.filterRow}>
             <span className={styles.filterLabel}>Condición:</span>
 
@@ -114,6 +113,7 @@ export default function ProductsPage({ searchParams }) {
             >
               Usados
             </Link>
+
             <Link
               className={`${styles.filterPill} ${
                 condition === "remanofacturado" ? styles.activePill : ""
@@ -128,7 +128,6 @@ export default function ProductsPage({ searchParams }) {
             </Link>
           </div>
 
-          {/* Categoría */}
           <div className={styles.filterRow}>
             <span className={styles.filterLabel}>Categoría:</span>
 
@@ -160,7 +159,6 @@ export default function ProductsPage({ searchParams }) {
         </div>
       </details>
 
-      {/* -------- GRID -------- */}
       <div className={styles.grid}>
         {visible.map((p) => (
           <Link
@@ -175,21 +173,19 @@ export default function ProductsPage({ searchParams }) {
             />
             <div className={styles.cardBody}>
               <h3 className={styles.name}>{p.name}</h3>
-
-              <p className={styles.price}>${p.price.toLocaleString("es-MX")}</p>
-
+              <p className={styles.price}>
+                ${Number(p.price).toLocaleString("es-MX")}
+              </p>
               <span className={styles.muted}>Ver más fotos →</span>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Si no hay resultados */}
       {total === 0 && (
         <div className={styles.empty}>No hay productos para esos filtros.</div>
       )}
 
-      {/* -------- PAGINACIÓN -------- */}
       <div className={styles.pagination}>
         {prevPage ? (
           <Link

@@ -1,24 +1,33 @@
 import Link from "next/link";
 import styles from "./product.module.css";
-import { products } from "../../../data/products";
 import ProductGallery from "./ProductGallery";
 
 export default async function ProductDetail({ params }) {
-  const { slug } = await params;
+  const slug = (params.slug || "").toLowerCase();
 
-  const product = products.find((p) => p.slug === slug);
+  const base =
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "http://localhost:3000";
 
-  if (!product) return <div>Producto no encontrado</div>;
+  const res = await fetch(`${base}/api/products/${slug}`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) return <div>Producto no encontrado</div>;
+
+  const data = await res.json();
+  const product = data.product;
 
   return (
     <section className={styles.wrapper}>
       <Link href="/products" className={styles.backButton}>
         ← Volver a productos
       </Link>
+
       <h1 className={styles.title}>{product.name}</h1>
       <p className={styles.subtitle}>Galería de fotos</p>
 
-      {/* ✅ La parte interactiva va en un Client Component */}
       <ProductGallery slug={slug} />
     </section>
   );
