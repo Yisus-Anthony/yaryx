@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import type { Product } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
-  const items = await prisma.product.findMany({
+  const items: Product[] = await prisma.product.findMany({
     orderBy: { updatedAt: "desc" },
   });
 
@@ -36,8 +37,9 @@ export default async function AdminProductsPage() {
               <th style={{ padding: 10 }}></th>
             </tr>
           </thead>
+
           <tbody>
-            {items.map((p) => (
+            {items.map((p: Product) => (
               <tr key={p.id} style={{ borderTop: "1px solid #eee" }}>
                 <td style={{ padding: 10 }}>{p.name}</td>
                 <td style={{ padding: 10 }}>{p.slug}</td>
@@ -51,6 +53,7 @@ export default async function AdminProductsPage() {
                 </td>
               </tr>
             ))}
+
             {!items.length ? (
               <tr>
                 <td colSpan={6} style={{ padding: 12 }}>
