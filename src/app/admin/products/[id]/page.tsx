@@ -53,7 +53,6 @@ export default async function EditProductPage({
         <Link href="/admin/products">← Volver</Link>
       </div>
 
-      {/* @ts-expect-error Server Action prop */}
       <ProductForm
         initial={product as any}
         onSave={onSave as any}
