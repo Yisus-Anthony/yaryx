@@ -116,7 +116,7 @@ export default function ProductsPage({ searchParams }) {
             </Link>
             <Link
               className={`${styles.filterPill} ${
-                condition === "usado" ? styles.activePill : ""
+                condition === "remanofacturado" ? styles.activePill : ""
               }`}
               href={buildUrl({
                 page: 1,
