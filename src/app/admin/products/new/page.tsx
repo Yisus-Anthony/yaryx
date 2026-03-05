@@ -35,7 +35,6 @@ export default function NewProductPage() {
         <Link href="/admin/products">← Volver</Link>
       </div>
 
-      {/* @ts-expect-error Server Action prop */}
       <ProductForm
         initial={{
           slug: "",
