@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useCart } from "@/components/cart/useCart";
+import { useCart } from "@/components/cart/CartProvider";
 
 export default function CheckoutPage() {
   const { totals } = useCart();
