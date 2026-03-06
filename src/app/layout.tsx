@@ -1,4 +1,5 @@
 import "./globals.css";
+import { CartProvider } from "@/components/cart/CartProvider";
 import Navbar from "../components/Navbar/Navbar";
 import WhatsAppButton from "../components/WhatsAppButton/WhatsAppButton";
 import Footer from "../components/Footer/Footer";
@@ -16,15 +17,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="layout">
-        <Navbar />
+        <CartProvider>
+          <Navbar />
 
-        <main className="main">
-          <div className="container">{children}</div>
-        </main>
+          <main className="main">
+            <div className="container">{children}</div>
+          </main>
 
-        <Footer />
+          <Footer />
 
-        <WhatsAppButton notificationCount={1} />
+          <WhatsAppButton notificationCount={1} />
+        </CartProvider>
       </body>
     </html>
   );

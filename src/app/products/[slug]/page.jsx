@@ -1,6 +1,7 @@
 import Link from "next/link";
 import styles from "./product.module.css";
 import ProductGallery from "./ProductGallery";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 
 export default async function ProductDetail({ params }) {
   const slug = (params.slug || "").toLowerCase();
@@ -29,6 +30,9 @@ export default async function ProductDetail({ params }) {
       <p className={styles.subtitle}>Galería de fotos</p>
 
       <ProductGallery slug={slug} />
+
+      {/* ✅ Botón real */}
+      <AddToCartButton productId={product.id} />
     </section>
   );
 }

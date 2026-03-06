@@ -1,0 +1,56 @@
+import { NextResponse } from "next/server";
+import { getCart } from "@/lib/cart";
+
+export async function POST() {
+  const cart = await getCart();
+  const items = cart?.items ?? [];
+
+  if (items.length === 0) {
+    return NextResponse.json({ error: "Carrito vacío" }, { status: 400 });
+  }
+
+  const accessToken = process.env.MP_ACCESS_TOKEN;
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+  if (!accessToken || !appUrl) {
+    return NextResponse.json({ error: "Faltan variables MP_ACCESS_TOKEN o NEXT_PUBLIC_APP_URL" }, { status: 500 });
+  }
+
+  // items a MP (ajusta currency_id si aplica)
+  const mpItems = items.map((it: any) => ({
+    title: it.product.name,
+    quantity: it.quantity,
+    unit_price: Number(it.product.price),
+    currency_id: "MXN",
+  }));
+
+  // Crea preference vía API MP
+  const res = await fetch("https://api.mercadopago.com/checkout/preferences", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      items: mpItems,
+      back_urls: {
+        success: `${appUrl}/checkout/success`,
+        failure: `${appUrl}/checkout/failure`,
+        pending: `${appUrl}/checkout/pending`,
+      },
+      auto_return: "approved",
+    }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return NextResponse.json({ error: data?.message ?? "Error Mercado Pago", details: data }, { status: 502 });
+  }
+
+  return NextResponse.json({
+    id: data.id,
+    init_point: data.init_point,
+    sandbox_init_point: data.sandbox_init_point,
+  });
+}

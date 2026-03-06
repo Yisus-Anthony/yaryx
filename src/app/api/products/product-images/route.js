@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
-import { prisma } from "@/lib/prisma";
+import  prisma  from "@/lib/prisma";
 
 const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } = process.env;
 

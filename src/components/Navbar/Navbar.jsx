@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 import ButtonLink from "../ButtonLink/ButtonLink";
+import CartBadge from "@/components/cart/CartBadge";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -32,22 +33,28 @@ export default function Navbar() {
 
         {/* Acciones desktop */}
         <div className={styles.actions}>
+          <CartBadge />
           <ButtonLink href="/contact" variant="ghost">
             Ir a Contacto
           </ButtonLink>
         </div>
 
         {/* Botón hamburguesa (solo mobile) */}
-        <button
-          type="button"
-          className={styles.burger}
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className={styles.burgerIcon} aria-hidden="true" />
-        </button>
+
+        <div className={styles.mobileActions}>
+          <CartBadge />
+
+          <button
+            type="button"
+            className={styles.burger}
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={open}
+            aria-controls="mobile-menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className={styles.burgerIcon} aria-hidden="true" />
+          </button>
+        </div>
 
         {/* Menú tipo overflow */}
         <div

@@ -4,6 +4,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+
 }
 
 model Product {
@@ -20,9 +23,42 @@ model Product {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  // Opcional (recomendado) para poder navegar relaciones desde Product:
+  cartItems     CartItem[]
+
   @@index([category])
   @@index([condition])
 }
+
+model Cart {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  // Si en el futuro agregas auth/usuarios, puedes ligar aquí
+  userId    String?
+
+  items     CartItem[]
+  @@index([userId])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+}
+
 model ContactMessage {
   id        String   @id @default(cuid())
   name      String

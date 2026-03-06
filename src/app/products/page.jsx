@@ -1,5 +1,6 @@
 import Link from "next/link";
 import styles from "./products.module.css";
+import AddToCartButton from "@/components/cart/AddToCartButton";
 
 function cldUrl(publicId) {
   const cloud = process.env.CLOUDINARY_CLOUD_NAME;
@@ -161,24 +162,26 @@ export default async function ProductsPage({ searchParams }) {
 
       <div className={styles.grid}>
         {visible.map((p) => (
-          <Link
-            key={p.slug}
-            href={`/products/${p.slug}`}
-            className={styles.card}
-          >
-            <img
-              className={styles.thumb}
-              src={cldUrl(p.coverPublicId)}
-              alt={p.name}
-            />
-            <div className={styles.cardBody}>
-              <h3 className={styles.name}>{p.name}</h3>
-              <p className={styles.price}>
-                ${Number(p.price).toLocaleString("es-MX")}
-              </p>
-              <span className={styles.muted}>Ver más fotos →</span>
+          <article key={p.slug} className={styles.card}>
+            <Link href={`/products/${p.slug}`} className={styles.cardLink}>
+              <img
+                className={styles.thumb}
+                src={cldUrl(p.coverPublicId)}
+                alt={p.name}
+              />
+              <div className={styles.cardBody}>
+                <h3 className={styles.name}>{p.name}</h3>
+                <p className={styles.price}>
+                  ${Number(p.price).toLocaleString("es-MX")}
+                </p>
+                <span className={styles.muted}>Ver más fotos →</span>
+              </div>
+            </Link>
+
+            <div className={styles.cardActions}>
+              <AddToCartButton productId={p.id} />
             </div>
-          </Link>
+          </article>
         ))}
       </div>
 

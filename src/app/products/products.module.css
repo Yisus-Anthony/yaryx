@@ -25,18 +25,29 @@
 /* ================= CARD ================= */
 
 .card {
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--border);
     background: rgba(255, 255, 255, 0.04);
     border-radius: var(--radius);
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: transform 0.12s ease;
-    text-decoration: none;
     color: inherit;
 }
 
 .card:hover {
     transform: translateY(-2px);
+}
+
+.cardLink {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.cardActions {
+    padding: 0 12px 12px;
 }
 
 /* ================= IMAGEN ================= */

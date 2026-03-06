@@ -2,7 +2,7 @@
 
 import ButtonLink from "../../components/ButtonLink/ButtonLink";
 import ContactForm from "./_components/ContactForm";
-import { prisma } from "@/lib/prisma";
+import  prisma  from "@/lib/prisma";
 import { Resend } from "resend";
 
 export const metadata = {
