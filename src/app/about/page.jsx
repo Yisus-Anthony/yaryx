@@ -10,21 +10,26 @@ export default function AboutPage() {
           inicio
         </ButtonLink>
       </div>
-      <h1>Acerca de Nosotros</h1>
+
+      <h1>Sobre Nosotros</h1>
 
       <p style={{ color: "var(--muted)", margin: 0 }}>
-        Somos una empresa enfocada en desarrollar soluciones digitales modernas,
-        escalables y centradas en el usuario.
+        En <strong>Tu Refaccionaria</strong> nos especializamos en la venta de
+        refacciones automotrices, principalmente marchas y alternadores nuevos y
+        usados importados desde Estados Unidos. Nuestro objetivo es ofrecer
+        piezas confiables a precios accesibles para que tu vehículo vuelva a
+        funcionar correctamente sin gastar de más.
       </p>
 
       {/* Historia */}
       <section style={{ display: "grid", gap: 8 }}>
         <h2>Nuestra Historia</h2>
         <p style={{ margin: 0 }}>
-          Nacimos con el objetivo de ayudar a empresas y emprendedores a
-          transformar sus ideas en productos digitales reales. Con el tiempo,
-          hemos consolidado procesos eficientes y un enfoque basado en calidad,
-          rendimiento y experiencia de usuario.
+          Tu Refaccionaria nace con la idea de brindar una alternativa confiable
+          para quienes buscan refacciones de calidad a buen precio. Con el paso
+          del tiempo hemos trabajado con distintos proveedores y talleres
+          automotrices para garantizar piezas funcionales, revisadas y listas
+          para instalar.
         </p>
       </section>
 
@@ -32,14 +37,16 @@ export default function AboutPage() {
       <section style={{ display: "grid", gap: 8 }}>
         <h2>Misión</h2>
         <p style={{ margin: 0 }}>
-          Crear soluciones tecnológicas que generen impacto, optimicen procesos
-          y aporten valor sostenible a nuestros clientes.
+          Ofrecer refacciones automotrices confiables y accesibles, brindando un
+          servicio rápido y honesto que ayude a nuestros clientes a mantener sus
+          vehículos en buen estado.
         </p>
 
         <h2>Visión</h2>
         <p style={{ margin: 0 }}>
-          Convertirnos en un referente en el desarrollo de productos digitales
-          innovadores a nivel nacional e internacional.
+          Convertirnos en una refaccionaria reconocida por la calidad de
+          nuestras piezas y la confianza que brindamos a nuestros clientes en
+          cada compra.
         </p>
       </section>
 
@@ -47,20 +54,21 @@ export default function AboutPage() {
       <section style={{ display: "grid", gap: 8 }}>
         <h2>Valores</h2>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
-          <li>Compromiso con la excelencia</li>
-          <li>Innovación constante</li>
-          <li>Transparencia y ética profesional</li>
-          <li>Enfoque centrado en el cliente</li>
+          <li>Honestidad en cada venta</li>
+          <li>Compromiso con la calidad</li>
+          <li>Atención cercana al cliente</li>
+          <li>Precios justos y competitivos</li>
         </ul>
       </section>
 
-      {/* Métricas */}
+      {/* Experiencia */}
       <section style={{ display: "grid", gap: 8 }}>
-        <h2>En Números</h2>
+        <h2>Lo que ofrecemos</h2>
         <ul style={{ margin: 0, paddingLeft: 18 }}>
-          <li>+5 años de experiencia</li>
-          <li>+100 proyectos completados</li>
-          <li>95% de satisfacción de clientes</li>
+          <li>Marchas nuevas y usadas</li>
+          <li>Alternadores importados</li>
+          <li>Piezas revisadas y funcionales</li>
+          <li>Asesoría para encontrar la refacción correcta</li>
         </ul>
       </section>
 
@@ -72,8 +80,8 @@ export default function AboutPage() {
           Contáctanos
         </ButtonLink>
 
-        <ButtonLink href="https://nextjs.org/docs" external variant="primary">
-          Leer Docs
+        <ButtonLink href="/" variant="ghost">
+          Ver productos
         </ButtonLink>
       </div>
     </div>

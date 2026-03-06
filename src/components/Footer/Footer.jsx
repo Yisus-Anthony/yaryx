@@ -57,6 +57,53 @@ export default function Footer() {
           </Link>
         </nav>
 
+        {/* Trust / beneficios */}
+        <div className={styles.trust} aria-label="Beneficios">
+          <span className={styles.trustItem}>
+            <span className={styles.trustIcon}>🔒</span>
+            Pagos seguros
+          </span>
+
+          <span className={styles.trustItem}>
+            <span className={styles.trustIcon}>🚚</span>
+            Envíos a todo México
+          </span>
+
+          <span className={styles.trustItem}>
+            <span className={styles.trustIcon}>🛠</span>
+            Refacciones nuevas y usadas
+          </span>
+
+          <span className={styles.trustItem}>
+            <span className={styles.trustIcon}>💬</span>
+            Atención por WhatsApp
+          </span>
+        </div>
+
+        {/* Info (a lo largo del footer en 3 columnas) */}
+        <div className={styles.info} aria-label="Información de contacto">
+          <div className={styles.infoGrid}>
+            <div className={styles.infoCol}>
+              <p className={styles.infoTitle}>Contacto</p>
+              <p className={styles.infoText}>WhatsApp: +52 55 2535-7452</p>
+              <p className={styles.infoText}>Teléfono: 55 2535-7452</p>
+              <p className={styles.infoText}>
+                Correo: yisus.anthony.y@icloud.com
+              </p>
+            </div>
+
+            <div className={styles.infoCol}>
+              <p className={styles.infoTitle}>Ubicación</p>
+              <p className={styles.infoText}>México, Tepotzotlán</p>
+            </div>
+
+            <div className={styles.infoCol}>
+              <p className={styles.infoTitle}>Horario</p>
+              <p className={styles.infoText}>Lunes a sábado 8am-6pm</p>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom row */}
         <div className={styles.bottom}>
           <span className={styles.copy}>© {year} Tu Refaccionaria</span>
@@ -215,7 +262,6 @@ function LogoSpei() {
         opacity="0.06"
       />
 
-      {/* SPEI (S P en azul, E en naranja, I en azul) */}
       <text
         x="52"
         y="27"
@@ -230,7 +276,6 @@ function LogoSpei() {
         <tspan fill="#2F2E7E">I</tspan>
       </text>
 
-      {/* ® pequeño (como en tu imagen) */}
       <text
         x="92"
         y="14"
@@ -248,16 +293,9 @@ function LogoSpei() {
 function LogoOxxo() {
   return (
     <SvgWrap title="OXXO" className={styles.logo}>
-      {/* Fondo rojo */}
       <rect x="0" y="0" width="120" height="40" rx="8" fill="#E30613" />
-
-      {/* Borde amarillo superior */}
       <rect x="0" y="0" width="120" height="6" fill="#F5A300" />
-
-      {/* Borde amarillo inferior */}
       <rect x="0" y="34" width="120" height="6" fill="#F5A300" />
-
-      {/* Texto OXXO estilizado */}
       <text
         x="60"
         y="27"

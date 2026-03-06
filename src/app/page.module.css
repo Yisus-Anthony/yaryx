@@ -1,46 +1,68 @@
 .hero {
+  /* Antes: display grid + gap */
   display: grid;
   gap: 18px;
+
+  /* Nuevo: espacio y centrado */
+  padding: clamp(18px, 4vw, 56px);
 }
 
+
+/* Card principal (hero) */
 .card {
-  background: var(--surface);
+  max-width: 1100px;
+  margin: 0 auto;
+
+  padding: clamp(18px, 3vw, 34px);
+  border-radius: calc(var(--radius) + 6px);
+
+  /* Mantiene tus variables pero lo hace más “premium” */
+  background:
+    radial-gradient(900px 260px at 20% 0%, rgba(99, 102, 241, 0.18), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+
+  backdrop-filter: blur(10px);
 }
 
+/* Tipografía pro: fluida + ancho de lectura */
 .title {
-  margin: 0 0 10px;
-  font-size: 34px;
-  line-height: 1.1;
+  margin: 0 0 12px;
+
+  font-size: clamp(30px, 3.2vw, 54px);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+
+  max-width: 22ch;
+  text-wrap: balance;
 }
 
 .subtitle {
   margin: 0 0 18px;
   color: var(--muted);
-  max-width: 65ch;
+
+  font-size: clamp(15px, 1.15vw, 18px);
+  line-height: 1.6;
+
+  max-width: 56ch;
 }
 
+/* CTA */
 .ctaRow {
   display: flex;
-  gap: 25px;
+  gap: 12px;
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
+/* Efecto “glow” más fino (sin brincar tanto) */
 .ctaAnimation {
   display: inline-flex;
   align-items: center;
   border-radius: 999px;
-  /* ← esto lo hace redondo */
-  animation: glowBreathe 2.2s ease-in-out infinite;
+
+  animation: glowBreathe 2.4s ease-in-out infinite;
   will-change: transform, box-shadow;
 }
 
@@ -53,27 +75,44 @@
   }
 
   50% {
-    transform: scale(1.05);
+    transform: scale(1.045);
+    /* antes 1.05, ahora más pro */
     box-shadow:
-      0 0 0 3px rgba(99, 102, 241, 0.15),
-      0 12px 28px rgba(99, 102, 241, 0.25);
+      0 0 0 4px rgba(99, 102, 241, 0.14),
+      0 14px 30px rgba(0, 0, 0, 0.12);
   }
 }
 
+/* Grid de tarjetas: mismo ancho que el hero */
+.grid {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Tarjetas inferiores */
 .surface {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: calc(var(--radius) + 4px);
   padding: 16px;
+
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
 .surface h3 {
   margin: 0 0 6px;
+  font-size: 18px;
+  line-height: 1.25;
 }
 
 .surface p {
   margin: 0;
   color: var(--muted);
+  line-height: 1.55;
 }
 
 /* Responsive */
@@ -83,6 +122,6 @@
   }
 
   .title {
-    font-size: 28px;
+    max-width: 22ch;
   }
 }

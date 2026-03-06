@@ -9,11 +9,12 @@ export default function HomePage() {
     <section className={styles.hero}>
       <div className={styles.card}>
         <h1 className={styles.title}>
-          En Tu Refaccionaria encontraras refacciones nuevas y usadas para tu
-          vehivulo
+          Refacciones nuevas y usadas <br />
+          para tu vehículo
         </h1>
+
         <p className={styles.subtitle}>
-          Marchas, Alternadores importados desde estados unidos
+          Marchas y alternadores importados desde Estados Unidos
         </p>
 
         <div className={styles.ctaRow}>
@@ -22,14 +23,14 @@ export default function HomePage() {
               Nuestros productos
             </ButtonLink>
           </div>
-          <ButtonLink href="/about" variant="ghost">
+          {/*<ButtonLink href="/about" variant="ghost">
             Sobre nosotros
-          </ButtonLink>
-          <div>
+          </ButtonLink>*/}
+          {/*<div>
             <ButtonLink href="https://yaryx.com" external variant="ghost">
               Haz crecer tu negocio
             </ButtonLink>
-          </div>
+          </div>*/}
         </div>
       </div>
 

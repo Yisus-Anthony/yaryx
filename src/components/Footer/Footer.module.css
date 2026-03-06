@@ -12,20 +12,28 @@
   gap: 18px;
 }
 
+/* Payments */
 .payments {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 14px;
+  align-items: center;
+  /* clave para alinear vertical */
+  gap: 16px;
 }
 
 .logo {
-  width: 96px;
-  height: 34px;
+  height: 32px;
+  /* altura visual uniforme */
+  width: auto;
+  /* mantiene proporción */
+  object-fit: contain;
+  display: block;
   color: var(--footer-fg, #111);
   border-radius: 10px;
 }
 
+/* Social */
 .social {
   display: flex;
   justify-content: center;
@@ -55,6 +63,28 @@
   height: 20px;
 }
 
+/* Trust / beneficios */
+.trust {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.trustItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trustIcon {
+  font-size: 16px;
+}
+
+/* Country strip (si lo usas en algún momento) */
 .country {
   width: min(520px, 100%);
   margin: 0 auto;
@@ -66,6 +96,7 @@
   font-weight: 600;
 }
 
+/* Bottom row */
 .bottom {
   display: flex;
   justify-content: space-between;
@@ -82,32 +113,64 @@
   opacity: 0.7;
 }
 
-.logo {
-  height: 32px;
-  /* altura visual uniforme */
-  width: auto;
-  /* mantiene proporción */
-  object-fit: contain;
-  display: block;
+/* --- Info block (Contacto / Ubicación / Horario) --- */
+/* --- Info block (Contacto / Ubicación / Horario) --- */
+.info {
+  max-width: 1100px;
+  /* antes estaba igual; ahora lo ampliamos */
+  width: min(980px, 100%);
+  /* ocupa más a lo ancho sin pegarse a los bordes */
+  margin: 0 auto;
+  padding: 20px 22px;
+  /* un poco más de aire */
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.payments {
-  display: flex;
-  align-items: center;
-  /* clave */
-  gap: 16px;
-  flex-wrap: wrap;
+/* 3 columnas más separadas */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  /* Contacto un poquito más ancho */
+  column-gap: 48px;
+  /* más separación horizontal */
+  row-gap: 18px;
+  text-align: left;
+  align-items: start;
+}
+
+.infoCol {
+  min-width: 0;
+}
+
+.infoTitle {
+  font-weight: 800;
+  margin: 0 0 10px 0;
+}
+
+.infoText {
+  margin: 0 0 8px 0;
+  opacity: 0.8;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 /* Responsive */
 @media (max-width: 640px) {
-  .logo {
-    width: 88px;
-    height: 32px;
+  .info {
+    width: 100%;
+    padding: 16px 14px;
   }
 
-  .bottom {
-    flex-direction: column;
+  .infoGrid {
+    grid-template-columns: 1fr;
     text-align: center;
+    column-gap: 0;
+    row-gap: 14px;
+  }
+
+  .infoText {
+    margin: 0 0 6px 0;
   }
 }
