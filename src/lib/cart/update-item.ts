@@ -15,6 +15,10 @@ export async function updateItem(productId: string, quantity: number) {
     where: { id: productId },
   });
 
+  if (!product) {
+    throw new Error("Producto no encontrado");
+  }
+
   validateProductPurchasable(product);
 
   if (qty > product.stock) {
