@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import  prisma  from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import ProductForm from "../_components/ProductForm";
+import { ProductCategory, ProductCondition } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +14,8 @@ export default function NewProductPage() {
         data: {
           slug: String(formData.slug),
           name: String(formData.name),
-          category: String(formData.category),
-          condition: String(formData.condition),
+          category: String(formData.category) as ProductCategory,
+          condition: String(formData.condition) as ProductCondition,
           price: Number(formData.price),
           folder: String(formData.folder),
           coverPublicId: String(formData.coverPublicId),
@@ -39,8 +40,8 @@ export default function NewProductPage() {
         initial={{
           slug: "",
           name: "",
-          category: "",
-          condition: "nuevo",
+          category: "" as ProductCategory,
+          condition: "nuevo" as ProductCondition,
           price: 0,
           folder: "",
           coverPublicId: "",
