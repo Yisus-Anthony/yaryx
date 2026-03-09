@@ -54,7 +54,7 @@ export async function createOrder(input: {
         productFolder: item.product.folder,
         productCoverPublicId: item.product.coverPublicId,
         productCondition: item.product.condition,
-        productCategory: item.product.category,
+        productCategory: item.product.category?.name ?? "Sin categoría",
         unitPrice: Number(item.product.price),
         quantity: item.quantity,
         lineTotal: Number(item.product.price) * item.quantity,

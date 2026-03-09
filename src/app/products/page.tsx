@@ -143,13 +143,13 @@ export default async function ProductsPage({
 
             {categories.map((c) => (
               <Link
-                key={c}
+                key={c.id}
                 className={`${styles.filterPill} ${
-                  category === c ? styles.activePill : ""
+                  category === c.slug ? styles.activePill : ""
                 }`}
-                href={buildUrl({ page: 1, condition, category: c })}
+                href={buildUrl({ page: 1, condition, category: c.slug })}
               >
-                {c}
+                {c.name}
               </Link>
             ))}
           </div>

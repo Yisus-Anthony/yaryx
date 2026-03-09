@@ -14,12 +14,6 @@ enum ProductCondition {
   REFURBISHED
 }
 
-enum ProductCategory {
-  SENSORES
-  COMPONENTS
-  OTHER
-}
-
 enum CartStatus {
   ACTIVE
   CONVERTED
@@ -75,6 +69,22 @@ enum WebhookProcessingStatus {
   FAILED
 }
 
+model Category {
+  id       String  @id @default(cuid())
+  name     String  @db.VarChar(120)
+  slug     String  @unique @db.VarChar(160)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
 model Product {
   id            String           @id @default(cuid())
   slug          String           @unique @db.VarChar(160)
@@ -83,10 +93,13 @@ model Product {
   folder        String           @db.VarChar(255)
   coverPublicId String           @db.VarChar(255)
   condition     ProductCondition
-  category      ProductCategory
-  price         Int
-  stock         Int              @default(0)
-  isActive      Boolean          @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  price    Int
+  stock    Int     @default(0)
+  isActive Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -95,7 +108,7 @@ model Product {
   orderItems OrderItem[]
 
   @@index([slug])
-  @@index([category])
+  @@index([categoryId])
   @@index([condition])
   @@index([isActive])
   @@index([createdAt])
@@ -202,7 +215,7 @@ model OrderItem {
   productFolder        String           @db.VarChar(255)
   productCoverPublicId String           @db.VarChar(255)
   productCondition     ProductCondition
-  productCategory      ProductCategory
+  productCategory      String           @db.VarChar(120)
 
   unitPrice Int
   quantity  Int

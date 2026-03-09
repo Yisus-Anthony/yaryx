@@ -8,7 +8,13 @@ export async function getCart() {
     where: { id: cartId },
     include: {
       items: {
-        include: { product: true },
+        include: {
+          product: {
+            include: {
+              category: true,
+            },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
     },

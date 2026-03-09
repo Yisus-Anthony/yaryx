@@ -9,7 +9,7 @@ type ProductInput = {
   folder: string;
   coverPublicId: string;
   condition: string;
-  category: string;
+  categoryId: string;
   price: number;
 };
 
@@ -48,30 +48,12 @@ export default function ProductForm({
       refurbished: "REFURBISHED",
     };
 
-    const categoryMap: Record<string, string> = {
-      sensores: "SENSORES",
-      sensore: "SENSORES",
-      components: "COMPONENTS",
-      componentes: "COMPONENTS",
-      other: "OTHER",
-      otros: "OTHER",
-    };
-
     const rawCondition = data.condition.trim().toLowerCase();
-    const rawCategory = data.category.trim().toLowerCase();
-
     const mappedCondition = conditionMap[rawCondition];
-    const mappedCategory = categoryMap[rawCategory];
 
     if (!mappedCondition) {
       setBusy(false);
       setMsg({ type: "err", text: "Condición inválida" });
-      return;
-    }
-
-    if (!mappedCategory) {
-      setBusy(false);
-      setMsg({ type: "err", text: "Categoría inválida" });
       return;
     }
 
@@ -82,7 +64,7 @@ export default function ProductForm({
       folder: data.folder.trim(),
       coverPublicId: data.coverPublicId.trim(),
       condition: mappedCondition,
-      category: mappedCategory,
+      categoryId: data.categoryId.trim(),
       price: Number(data.price),
     });
 
@@ -129,10 +111,10 @@ export default function ProductForm({
       </label>
 
       <label>
-        Categoría
+        Category ID
         <input
-          value={data.category}
-          onChange={(e) => set("category", e.target.value)}
+          value={data.categoryId}
+          onChange={(e) => set("categoryId", e.target.value)}
           required
         />
       </label>

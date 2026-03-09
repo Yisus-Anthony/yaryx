@@ -1,7 +1,6 @@
 import prisma from "@/lib/prisma";
 import { retry } from "@/lib/retry";
-import { Prisma, ProductCategory, ProductCondition } from "@prisma/client";
-
+import { Prisma, ProductCondition } from "@prisma/client";
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 50;
@@ -27,14 +26,6 @@ const conditionMap: Record<string, ProductCondition> = {
     REMANUFACTURADOS: ProductCondition.REFURBISHED,
 };
 
-const categoryMap: Record<string, ProductCategory> = {
-    SENSORES: ProductCategory.SENSORES,
-    COMPONENTS: ProductCategory.COMPONENTS,
-    COMPONENTES: ProductCategory.COMPONENTS,
-    OTHER: ProductCategory.OTHER,
-    OTROS: ProductCategory.OTHER,
-};
-
 export async function getProducts({
     page = 1,
     pageSize = DEFAULT_PAGE_SIZE,
@@ -44,13 +35,15 @@ export async function getProducts({
     const safePage = Math.max(1, Number(page) || 1);
     const safePageSize = Math.min(
         MAX_PAGE_SIZE,
-        Math.max(1, Number(pageSize) || DEFAULT_PAGE_SIZE),
+        Math.max(1, Number(pageSize) || DEFAULT_PAGE_SIZE)
     );
 
     const normalizedCondition = condition.trim().toUpperCase();
-    const normalizedCategory = category.trim().toUpperCase();
+    const normalizedCategory = category.trim().toLowerCase();
 
-    const where: Prisma.ProductWhereInput = {};
+    const where: Prisma.ProductWhereInput = {
+        isActive: true,
+    };
 
     if (normalizedCondition !== "ALL") {
         const mappedCondition = conditionMap[normalizedCondition];
@@ -62,14 +55,12 @@ export async function getProducts({
         where.condition = mappedCondition;
     }
 
-    if (normalizedCategory !== "ALL") {
-        const mappedCategory = categoryMap[normalizedCategory];
-
-        if (!mappedCategory) {
-            throw new Error(`Invalid category: ${category}`);
-        }
-
-        where.category = mappedCategory;
+    if (normalizedCategory !== "all") {
+        where.category = {
+            is: {
+                slug: normalizedCategory,
+            },
+        };
     }
 
     const [total, items] = await Promise.all([
@@ -87,7 +78,14 @@ export async function getProducts({
                     folder: true,
                     coverPublicId: true,
                     condition: true,
-                    category: true,
+                    categoryId: true,
+                    category: {
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true,
+                        },
+                    },
                     price: true,
                     stock: true,
                     createdAt: true,
@@ -105,12 +103,15 @@ export async function getProducts({
         totalPages: Math.max(1, Math.ceil(total / safePageSize)),
     };
 }
-export async function getProductCategories() {
-    const rows = await prisma.product.findMany({
-        select: { category: true },
-        distinct: ["category"],
-        orderBy: { category: "asc" },
-    });
 
-    return rows.map((row) => row.category);
+export async function getProductCategories() {
+    return prisma.category.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+        },
+    });
 }

@@ -7,11 +7,33 @@ const prisma = new PrismaClient();
 async function main() {
     console.log("🌱 Seed started");
 
-    // Verifica que la conexión funcione
     await prisma.$queryRaw`SELECT 1`;
-
     console.log("✅ Database connection OK");
-    console.log("✅ No seed data required");
+
+    const categories = [
+        { name: "Sensores", slug: "sensores" },
+        { name: "Alternadores", slug: "alternadores" },
+        { name: "Marchas", slug: "marchas" },
+        { name: "Componentes", slug: "componentes" },
+        { name: "Otros", slug: "otros" },
+    ];
+
+    for (const category of categories) {
+        await prisma.category.upsert({
+            where: { slug: category.slug },
+            update: {
+                name: category.name,
+                isActive: true,
+            },
+            create: {
+                name: category.name,
+                slug: category.slug,
+                isActive: true,
+            },
+        });
+    }
+
+    console.log("✅ Categories seeded");
 }
 
 main()
