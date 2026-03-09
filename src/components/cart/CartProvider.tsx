@@ -97,11 +97,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const totals = useMemo(() => {
     const items = cart?.items ?? [];
+
     const subtotal = items.reduce(
       (acc: number, item: any) =>
-        acc + Number(item.product.price) * item.quantity,
+        acc + Number(item.unitPrice ?? item.product.price) * item.quantity,
       0,
     );
+
     const count = items.reduce(
       (acc: number, item: any) => acc + item.quantity,
       0,

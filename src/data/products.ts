@@ -1,0 +1,90 @@
+export type ProductCondition = "nuevo" | "usado" | "remanufacturado";
+
+export type ProductCategory = "alternadores" | "motores-de-arranque";
+
+export type Product = {
+    slug: string;
+    name: string;
+    folder: string;
+    coverPublicId: string;
+    condition: ProductCondition;
+    category: ProductCategory;
+    price: number;
+};
+
+export const products: Product[] = [
+    {
+        slug: "alternador",
+        name: "Alternador",
+        folder: "product/alternadores/alternador-11si",
+        coverPublicId: "product/alternadores/alternador-11si/IMG_1170_sflhn6",
+        condition: "usado",
+        category: "alternadores",
+        price: 2500,
+    },
+    {
+        slug: "alternador2",
+        name: "Alternador 2",
+        folder: "product/alternadores/alternador2",
+        coverPublicId: "product/alternadores/alternador2/IMG_1112_xeyetl",
+        condition: "nuevo",
+        category: "alternadores",
+        price: 3800,
+    },
+    {
+        slug: "alternador-21si",
+        name: "Alternador 21SI",
+        folder: "product/alternadores/alternador-21si",
+        coverPublicId: "product/alternadores/alternador-21si/IMG_1196_bjwlo9",
+        condition: "remanufacturado",
+        category: "alternadores",
+        price: 2200,
+    },
+    {
+        slug: "alternador-22si",
+        name: "Alternador 22SI",
+        folder: "product/alternadores/alternador-22si",
+        coverPublicId: "product/alternadores/alternador-22si/IMG_1195_qow0bu",
+        condition: "remanufacturado",
+        category: "alternadores",
+        price: 2300,
+    },
+    {
+        slug: "alternador-28si",
+        name: "Alternador 28SI",
+        folder: "product/alternadores/alternador-28si",
+        coverPublicId: "product/alternadores/alternador-28si/IMG_1188_djwtko",
+        condition: "remanufacturado",
+        category: "alternadores",
+        price: 2850,
+    },
+    {
+        slug: "alternador-35si",
+        name: "Alternador 35SI",
+        folder: "product/alternadores/alternador-35si",
+        coverPublicId: "product/alternadores/alternador-35si/IMG_1206_ifotfx",
+        condition: "remanufacturado",
+        category: "alternadores",
+        price: 3000,
+    },
+    {
+        slug: "borne-negativo-para-marcha-42mt",
+        name: "Borne negativo para marcha 42MT",
+        folder:
+            "product/motores-de-arranque/marcha-42mt/marcha-42mt-refacciones/borne-negativo-para-marcha-42mt",
+        coverPublicId:
+            "product/motores-de-arranque/marcha-42mt/marcha-42mt-refacciones/borne-negativo-para-marcha-42mt/IMG_1246_joxoh2",
+        condition: "nuevo",
+        category: "motores-de-arranque",
+        price: 150,
+    },
+    {
+        slug: "alternador-h100",
+        name: "Alternador H100",
+        folder: "product/alternadores/alternador-h100",
+        coverPublicId: "product/alternadores/alternador-h100/IMG_1101_t3kojq",
+        condition: "remanufacturado",
+        category: "alternadores",
+        price: 2500,
+    },
+];

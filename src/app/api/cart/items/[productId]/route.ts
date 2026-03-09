@@ -1,94 +1,30 @@
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { getOrCreateCartId } from "@/lib/cart";
+import { removeItem } from "@/lib/cart/remove-item";
+import { updateItem } from "@/lib/cart/update-item";
 
-export async function PATCH(
-    req: Request,
-    ctx: { params: { productId: string } }
-) {
-    const { productId } = ctx.params;
-    const { quantity } = await req.json();
+type RouteContext = {
+  params: {
+    productId: string;
+  };
+};
 
-    const cartId = await getOrCreateCartId();
-    const qty = Number(quantity);
-
-    if (!Number.isFinite(qty) || qty < 1) {
-        return NextResponse.json({ error: "quantity inválida" }, { status: 400 });
-    }
-
-    const product = await prisma.product.findUnique({
-        where: { id: productId },
-    });
-
-    if (!product) {
-        return NextResponse.json({ error: "Producto no existe" }, { status: 404 });
-    }
-
-    const stock = product.stock ?? 0;
-    if (qty > stock) {
-        return NextResponse.json({ error: "Sin stock suficiente" }, { status: 409 });
-    }
-
-    const existing = await prisma.cartItem.findUnique({
-        where: { cartId_productId: { cartId, productId } },
-    });
-
-    if (!existing) {
-        return NextResponse.json(
-            { error: "El producto no está en el carrito" },
-            { status: 404 }
-        );
-    }
-
-    await prisma.cartItem.update({
-        where: { cartId_productId: { cartId, productId } },
-        data: { quantity: qty },
-    });
-
-    const cart = await prisma.cart.findUnique({
-        where: { id: cartId },
-        include: {
-            items: {
-                include: { product: true },
-                orderBy: { createdAt: "asc" },
-            },
-        },
-    });
-
+export async function PATCH(req: Request, { params }: RouteContext) {
+  try {
+    const body = await req.json();
+    const cart = await updateItem(params.productId, Number(body.quantity));
     return NextResponse.json(cart);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error actualizando carrito";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 }
 
-export async function DELETE(
-    _req: Request,
-    ctx: { params: { productId: string } }
-) {
-    const { productId } = ctx.params;
-    const cartId = await getOrCreateCartId();
-
-    const existing = await prisma.cartItem.findUnique({
-        where: { cartId_productId: { cartId, productId } },
-    });
-
-    if (!existing) {
-        return NextResponse.json(
-            { error: "El producto no está en el carrito" },
-            { status: 404 }
-        );
-    }
-
-    await prisma.cartItem.delete({
-        where: { cartId_productId: { cartId, productId } },
-    });
-
-    const cart = await prisma.cart.findUnique({
-        where: { id: cartId },
-        include: {
-            items: {
-                include: { product: true },
-                orderBy: { createdAt: "asc" },
-            },
-        },
-    });
-
+export async function DELETE(_req: Request, { params }: RouteContext) {
+  try {
+    const cart = await removeItem(params.productId);
     return NextResponse.json(cart);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error eliminando producto";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
 }

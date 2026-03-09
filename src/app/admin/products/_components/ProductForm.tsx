@@ -36,16 +36,56 @@ export default function ProductForm({
     e.preventDefault();
     setMsg(null);
     setBusy(true);
+
+    const conditionMap: Record<string, string> = {
+      nuevo: "NEW",
+      nuevos: "NEW",
+      used: "USED",
+      usado: "USED",
+      usados: "USED",
+      remanufacturado: "REFURBISHED",
+      remanufacturados: "REFURBISHED",
+      refurbished: "REFURBISHED",
+    };
+
+    const categoryMap: Record<string, string> = {
+      sensores: "SENSORES",
+      sensore: "SENSORES",
+      components: "COMPONENTS",
+      componentes: "COMPONENTS",
+      other: "OTHER",
+      otros: "OTHER",
+    };
+
+    const rawCondition = data.condition.trim().toLowerCase();
+    const rawCategory = data.category.trim().toLowerCase();
+
+    const mappedCondition = conditionMap[rawCondition];
+    const mappedCategory = categoryMap[rawCategory];
+
+    if (!mappedCondition) {
+      setBusy(false);
+      setMsg({ type: "err", text: "Condición inválida" });
+      return;
+    }
+
+    if (!mappedCategory) {
+      setBusy(false);
+      setMsg({ type: "err", text: "Categoría inválida" });
+      return;
+    }
+
     const res = await onSave({
       ...data,
-      slug: data.slug.trim().toLowerCase(), // normalizamos
+      slug: data.slug.trim().toLowerCase(),
       name: data.name.trim(),
       folder: data.folder.trim(),
       coverPublicId: data.coverPublicId.trim(),
-      condition: data.condition.trim().toLowerCase(),
-      category: data.category.trim().toLowerCase(),
+      condition: mappedCondition,
+      category: mappedCategory,
       price: Number(data.price),
     });
+
     setBusy(false);
     setMsg(
       res.ok
@@ -98,7 +138,7 @@ export default function ProductForm({
       </label>
 
       <label>
-        Condición (nuevo/usado/remanofacturado)
+        Condición (nuevo/usado/remanufacturado)
         <input
           value={data.condition}
           onChange={(e) => set("condition", e.target.value)}

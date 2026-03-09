@@ -1,5 +1,5 @@
 import styles from "./page.module.css";
-import ButtonLink from "../components/ButtonLink/ButtonLink";
+import ButtonLink from "../components/ui/ButtonLink/ButtonLink";
 
 console.log("page.module.css keys:", Object.keys(styles));
 console.log("pulseWrapper:", styles.pulseWrapper);

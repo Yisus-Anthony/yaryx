@@ -3,67 +3,312 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
 
+enum ProductCondition {
+  NEW
+  USED
+  REFURBISHED
+}
+
+enum ProductCategory {
+  SENSORES
+  COMPONENTS
+  OTHER
+}
+
+enum CartStatus {
+  ACTIVE
+  CONVERTED
+  ABANDONED
+  EXPIRED
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  PROCESSING
+  COMPLETED
+  CANCELLED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  AUTHORIZED
+  APPROVED
+  CAPTURED
+  FAILED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  MERCADOPAGO
+  PAYPAL
+  CODI
+}
+
+enum PaymentMethod {
+  CARD
+  DEBIT_CARD
+  CREDIT_CARD
+  CASH
+  BANK_TRANSFER
+  WALLET
+  CODI
+  PAYPAL
+  OTHER
+}
+
+enum WebhookProcessingStatus {
+  RECEIVED
+  PROCESSED
+  IGNORED
+  FAILED
 }
 
 model Product {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  name          String
-  folder        String
-  coverPublicId String
-  condition     String
-  category      String
+  id            String           @id @default(cuid())
+  slug          String           @unique @db.VarChar(160)
+  name          String           @db.VarChar(200)
+  description   String?          @db.Text
+  folder        String           @db.VarChar(255)
+  coverPublicId String           @db.VarChar(255)
+  condition     ProductCondition
+  category      ProductCategory
   price         Int
-  stock         Int      @default(0)
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  // Opcional (recomendado) para poder navegar relaciones desde Product:
-  cartItems     CartItem[]
-
-  @@index([category])
-  @@index([condition])
-}
-
-model Cart {
-  id        String     @id @default(cuid())
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-
-  // Si en el futuro agregas auth/usuarios, puedes ligar aquí
-  userId    String?
-
-  items     CartItem[]
-  @@index([userId])
-}
-
-model CartItem {
-  id        String   @id @default(cuid())
-  cartId    String
-  productId String
-  quantity  Int      @default(1)
-
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  stock         Int              @default(0)
+  isActive      Boolean          @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@index([slug])
+  @@index([category])
+  @@index([condition])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  sessionId String?    @unique @db.VarChar(191)
+  userId    String?    @db.VarChar(191)
+  status    CartStatus @default(ACTIVE)
+  expiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items  CartItem[]
+  orders Order[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([expiresAt])
+}
+
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+  unitPrice Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
   @@unique([cartId, productId])
   @@index([cartId])
   @@index([productId])
+  @@index([createdAt])
+}
+
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique @db.VarChar(50)
+  reference   String @unique @db.VarChar(100)
+
+  cartId String?
+  userId String? @db.VarChar(191)
+
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+
+  currency String @default("MXN") @db.VarChar(10)
+
+  subtotal       Int
+  taxAmount      Int @default(0)
+  shippingAmount Int @default(0)
+  discountAmount Int @default(0)
+  totalAmount    Int
+
+  totalItems Int @default(0)
+
+  customerName  String? @db.VarChar(150)
+  customerEmail String? @db.VarChar(191)
+  customerPhone String? @db.VarChar(30)
+
+  billingAddress  Json?
+  shippingAddress Json?
+  metadata        Json?
+  notes           String? @db.Text
+
+  placedAt    DateTime  @default(now())
+  paidAt      DateTime?
+  cancelledAt DateTime?
+  failedAt    DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart          Cart?                 @relation(fields: [cartId], references: [id], onDelete: SetNull)
+  items         OrderItem[]
+  payments      Payment[]
+  webhookEvents PaymentWebhookEvent[]
+
+  @@index([cartId])
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([customerEmail])
+  @@index([placedAt])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String?
+
+  productSlug          String           @db.VarChar(160)
+  productName          String           @db.VarChar(200)
+  productFolder        String           @db.VarChar(255)
+  productCoverPublicId String           @db.VarChar(255)
+  productCondition     ProductCondition
+  productCategory      ProductCategory
+
+  unitPrice Int
+  quantity  Int
+  lineTotal Int
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([productSlug])
+}
+
+model Payment {
+  id      String @id @default(cuid())
+  orderId String
+
+  provider PaymentProvider
+  method   PaymentMethod?
+
+  status         PaymentStatus @default(PENDING)
+  providerStatus String?       @db.VarChar(100)
+
+  currency String @default("MXN") @db.VarChar(10)
+  amount   Int
+
+  externalPaymentId String? @db.VarChar(191)
+  externalOrderId   String? @db.VarChar(191)
+  externalReference String? @db.VarChar(191)
+  checkoutSessionId String? @db.VarChar(191)
+  approvalUrl       String? @db.Text
+
+  idempotencyKey String? @unique @db.VarChar(191)
+
+  requestPayload  Json?
+  responsePayload Json?
+  metadata        Json?
+
+  expiresAt   DateTime?
+  approvedAt  DateTime?
+  capturedAt  DateTime?
+  failedAt    DateTime?
+  cancelledAt DateTime?
+  refundedAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order         Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  webhookEvents PaymentWebhookEvent[]
+
+  @@index([orderId])
+  @@index([provider])
+  @@index([method])
+  @@index([status])
+  @@index([externalPaymentId])
+  @@index([externalOrderId])
+  @@index([externalReference])
+  @@index([checkoutSessionId])
+  @@index([createdAt])
+}
+
+model PaymentWebhookEvent {
+  id              String          @id @default(cuid())
+  provider        PaymentProvider
+  eventType       String          @db.VarChar(120)
+  externalEventId String?         @db.VarChar(191)
+
+  orderId   String?
+  paymentId String?
+
+  processingStatus WebhookProcessingStatus @default(RECEIVED)
+
+  signature       String? @db.Text
+  payload         Json
+  headers         Json?
+  processingError String? @db.Text
+
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  order   Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, externalEventId])
+  @@index([provider])
+  @@index([eventType])
+  @@index([processingStatus])
+  @@index([orderId])
+  @@index([paymentId])
+  @@index([receivedAt])
 }
 
 model ContactMessage {
   id        String   @id @default(cuid())
-  name      String
-  email     String
-  subject   String
-  message   String
+  name      String   @db.VarChar(150)
+  email     String   @db.VarChar(191)
+  subject   String   @db.VarChar(200)
+  message   String   @db.Text
   createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
 }

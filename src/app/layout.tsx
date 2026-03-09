@@ -1,8 +1,8 @@
 import "./globals.css";
 import { CartProvider } from "@/components/cart/CartProvider";
-import Navbar from "../components/Navbar/Navbar";
-import WhatsAppButton from "../components/WhatsAppButton/WhatsAppButton";
-import Footer from "../components/Footer/Footer";
+import Navbar from "../components/layout/Navbar/Navbar";
+import WhatsAppButton from "../components/layout/WhatsAppButton/WhatsAppButton";
+import Footer from "../components/layout/Footer/Footer";
 
 export const metadata = {
   title: "Tu Refaccionaria",
