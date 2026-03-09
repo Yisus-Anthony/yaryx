@@ -22,7 +22,10 @@ export async function createPaymentSession(input: {
   const existingPending = order.payments.find(
     (p) =>
       p.provider === input.provider &&
-      [PaymentStatus.PENDING, PaymentStatus.REQUIRES_ACTION].includes(p.status)
+      (
+        p.status === PaymentStatus.PENDING ||
+        p.status === PaymentStatus.REQUIRES_ACTION
+      )
   );
 
   const payment =
