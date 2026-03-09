@@ -14,6 +14,10 @@ export async function addItem(productId: string, quantity = 1) {
     where: { id: productId },
   });
 
+  if (!product) {
+    throw new Error("Producto no encontrado");
+  }
+
   validateProductPurchasable(product);
 
   const existing = await prisma.cartItem.findUnique({
