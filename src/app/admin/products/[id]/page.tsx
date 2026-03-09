@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import  prisma  from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import ProductForm from "../_components/ProductForm";
+import { ProductCategory, ProductCondition } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +22,8 @@ export default async function EditProductPage({
         data: {
           slug: String(formData.slug),
           name: String(formData.name),
-          category: String(formData.category),
-          condition: String(formData.condition),
+          category: String(formData.category) as ProductCategory,
+          condition: String(formData.condition) as ProductCondition,
           price: Number(formData.price),
           folder: String(formData.folder),
           coverPublicId: String(formData.coverPublicId),
