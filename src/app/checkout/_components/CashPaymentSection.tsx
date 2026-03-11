@@ -6,16 +6,31 @@ import type { CheckoutCustomerData } from "./CheckoutCustomerForm";
 
 type Props = {
   customer: CheckoutCustomerData;
-  onResult: (result: {
-    type: "success" | "error";
-    message: string;
-  }) => void;
+  onResult: (result: { type: "success" | "error"; message: string }) => void;
+};
+
+type CashCheckoutResponse = {
+  ok: boolean;
+  ticketUrl?: string | null;
+  barcode?: {
+    content?: string | null;
+    width?: number | null;
+    height?: number | null;
+    type?: string | null;
+  } | null;
+  reference?: string | null;
+  error?: string;
 };
 
 export default function CashPaymentSection({ customer, onResult }: Props) {
   const [busy, setBusy] = useState(false);
   const [ticketUrl, setTicketUrl] = useState<string | null>(null);
-  const [barcode, setBarcode] = useState<string | null>(null);
+  const [barcode, setBarcode] = useState<{
+    content?: string | null;
+    width?: number | null;
+    height?: number | null;
+    type?: string | null;
+  } | null>(null);
   const [reference, setReference] = useState<string | null>(null);
 
   async function handleGenerateTicket() {
@@ -34,7 +49,10 @@ export default function CashPaymentSection({ customer, onResult }: Props) {
         }),
       });
 
-      const data = await res.json().catch(() => ({}));
+      const data: CashCheckoutResponse = await res.json().catch(() => ({
+        ok: false,
+        error: "Respuesta inválida del servidor",
+      }));
 
       if (!res.ok || !data?.ok) {
         throw new Error(data?.error ?? "No se pudo generar la ficha OXXO");
@@ -46,12 +64,17 @@ export default function CashPaymentSection({ customer, onResult }: Props) {
 
       onResult({
         type: "success",
-        message: `Ficha OXXO generada correctamente. Referencia: ${data.reference}`,
+        message: `Ficha OXXO generada correctamente. Referencia: ${data.reference ?? "sin referencia"}`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo generar la ficha OXXO";
+
       onResult({
         type: "error",
-        message: error?.message ?? "No se pudo generar la ficha OXXO",
+        message,
       });
     } finally {
       setBusy(false);
@@ -80,10 +103,20 @@ export default function CashPaymentSection({ customer, onResult }: Props) {
         </div>
       ) : null}
 
-      {reference ? (
+      {reference || barcode?.content || ticketUrl ? (
         <div className={styles.result}>
-          <div><strong>Referencia:</strong> {reference}</div>
-          {barcode ? <div><strong>Código:</strong> {barcode}</div> : null}
+          {reference ? (
+            <div>
+              <strong>Referencia:</strong> {reference}
+            </div>
+          ) : null}
+
+          {barcode?.content ? (
+            <div>
+              <strong>Código de barras:</strong> {barcode.content}
+            </div>
+          ) : null}
+
           {ticketUrl ? (
             <a
               href={ticketUrl}
