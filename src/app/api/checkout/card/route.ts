@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { createMercadoPagoCardPayment } from "@/lib/payments/providers/mercadopago/create-card-payment";
+import {
+  createMercadoPagoCardPayment,
+  type CreateCardPaymentInput,
+} from "@/lib/payments/providers/mercadopago/create-card-payment";
 
 type CardRouteBody = {
   token?: string;
@@ -61,7 +64,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const normalized = {
+    const normalized: CreateCardPaymentInput = {
       token,
       issuer_id: body.issuer_id ?? body.issuerId ?? null,
       payment_method_id: paymentMethodId,
@@ -85,10 +88,7 @@ export async function POST(req: Request) {
 
     const result = await createMercadoPagoCardPayment(normalized);
 
-    return NextResponse.json({
-      ok: true,
-      ...result,
-    });
+    return NextResponse.json(result);
   } catch (error) {
     console.error("CARD ROUTE ERROR:", error);
 
