@@ -10,19 +10,6 @@ type Props = {
   onResult: (result: { type: "success" | "error"; message: string }) => void;
 };
 
-type MercadoPagoConstructor = new (
-  publicKey: string,
-  options?: { locale?: string },
-) => {
-  bricks: () => {
-    create: (
-      brickType: "cardPayment",
-      containerId: string,
-      settings: Record<string, unknown>,
-    ) => Promise<{ unmount: () => void }>;
-  };
-};
-
 type CardBrickFormData = {
   token?: string;
   issuer_id?: string | number | null;
@@ -38,12 +25,6 @@ type CardBrickFormData = {
     };
   };
 };
-
-declare global {
-  interface Window {
-    MercadoPago?: MercadoPagoConstructor;
-  }
-}
 
 const MP_BRICK_CONTAINER_ID = "mp-card-payment-brick";
 
