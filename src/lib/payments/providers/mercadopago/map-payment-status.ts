@@ -23,22 +23,53 @@ export function mapMercadoPagoStatus(status?: string | null): PaymentStatus {
   }
 }
 
-export function mapMercadoPagoMethod(paymentTypeId?: string | null): PaymentMethod | null {
-  const value = (paymentTypeId || "").toLowerCase();
+export function mapMercadoPagoMethod(
+  paymentTypeId?: string | null,
+  paymentMethodId?: string | null
+): PaymentMethod | null {
+  const type = (paymentTypeId || "").toLowerCase();
+  const method = (paymentMethodId || "").toLowerCase();
 
-  switch (value) {
-    case "credit_card":
-      return PaymentMethod.CREDIT_CARD;
-    case "debit_card":
-      return PaymentMethod.DEBIT_CARD;
-    case "bank_transfer":
-      return PaymentMethod.BANK_TRANSFER;
-    case "ticket":
-    case "atm":
-      return PaymentMethod.CASH;
-    case "account_money":
-      return PaymentMethod.WALLET;
-    default:
-      return null;
+  if (type === "credit_card") {
+    return PaymentMethod.CREDIT_CARD;
   }
+
+  if (type === "debit_card") {
+    return PaymentMethod.DEBIT_CARD;
+  }
+
+  if (type === "bank_transfer") {
+    return PaymentMethod.BANK_TRANSFER;
+  }
+
+  if (type === "ticket" || type === "atm") {
+    return PaymentMethod.CASH;
+  }
+
+  if (type === "account_money") {
+    return PaymentMethod.WALLET;
+  }
+
+  if (
+    method === "visa" ||
+    method === "master" ||
+    method === "mastercard" ||
+    method === "amex"
+  ) {
+    return PaymentMethod.CREDIT_CARD;
+  }
+
+  if (method === "debvisa" || method === "debmaster") {
+    return PaymentMethod.DEBIT_CARD;
+  }
+
+  if (
+    method === "oxxo" ||
+    method === "oxxo_pay" ||
+    method === "paycash"
+  ) {
+    return PaymentMethod.CASH;
+  }
+
+  return null;
 }
