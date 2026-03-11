@@ -12,7 +12,7 @@ import {
 import { createPayment } from "./client";
 import { mapMercadoPagoStatus } from "./map-payment-status";
 
-type CreateCardPaymentInput = {
+export type CreateCardPaymentInput = {
     token: string;
     issuer_id?: string | number | null;
     payment_method_id: string;

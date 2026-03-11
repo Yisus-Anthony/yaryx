@@ -25,18 +25,54 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as CardRouteBody;
 
+    console.log("CARD ROUTE RAW BODY:", JSON.stringify(body, null, 2));
+
+    const token = body.token?.trim();
+    const paymentMethodId =
+      body.payment_method_id?.trim() ?? body.paymentMethodId?.trim();
+    const payerEmail = body.payer?.email?.trim();
+    const installments = Number(body.installments ?? 1);
+
+    if (!token) {
+      return NextResponse.json(
+        { ok: false, error: "Falta token de tarjeta" },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentMethodId) {
+      return NextResponse.json(
+        { ok: false, error: "Falta payment_method_id" },
+        { status: 400 }
+      );
+    }
+
+    if (!payerEmail) {
+      return NextResponse.json(
+        { ok: false, error: "Falta payer.email" },
+        { status: 400 }
+      );
+    }
+
+    if (!Number.isFinite(installments) || installments < 1) {
+      return NextResponse.json(
+        { ok: false, error: "Installments inválido" },
+        { status: 400 }
+      );
+    }
+
     const normalized = {
-      token: body.token,
+      token,
       issuer_id: body.issuer_id ?? body.issuerId ?? null,
-      payment_method_id: body.payment_method_id ?? body.paymentMethodId,
-      installments: Number(body.installments ?? 1),
+      payment_method_id: paymentMethodId,
+      installments,
       payer: {
-        email: body.payer?.email?.trim(),
+        email: payerEmail,
         identification: body.payer?.identification
           ? {
-              type: body.payer.identification.type,
-              number: body.payer.identification.number,
-            }
+            type: body.payer.identification.type,
+            number: body.payer.identification.number,
+          }
           : undefined,
       },
       customer: {
@@ -45,39 +81,7 @@ export async function POST(req: Request) {
       },
     };
 
-    console.log("CARD ROUTE RAW BODY:", JSON.stringify(body, null, 2));
     console.log("CARD ROUTE NORMALIZED:", JSON.stringify(normalized, null, 2));
-
-    if (!normalized.token) {
-      return NextResponse.json(
-        { ok: false, error: "Falta token de tarjeta" },
-        { status: 400 }
-      );
-    }
-
-    if (!normalized.payment_method_id) {
-      return NextResponse.json(
-        { ok: false, error: "Falta payment_method_id" },
-        { status: 400 }
-      );
-    }
-
-    if (!normalized.payer.email) {
-      return NextResponse.json(
-        { ok: false, error: "Falta payer.email" },
-        { status: 400 }
-      );
-    }
-
-    if (
-      !Number.isFinite(normalized.installments) ||
-      normalized.installments < 1
-    ) {
-      return NextResponse.json(
-        { ok: false, error: "Installments inválido" },
-        { status: 400 }
-      );
-    }
 
     const result = await createMercadoPagoCardPayment(normalized);
 
@@ -97,9 +101,6 @@ export async function POST(req: Request) {
       ? 502
       : 400;
 
-    return NextResponse.json(
-      { ok: false, error: message },
-      { status }
-    );
+    return NextResponse.json({ ok: false, error: message }, { status });
   }
 }
