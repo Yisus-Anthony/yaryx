@@ -48,6 +48,7 @@ enum PaymentProvider {
   MERCADOPAGO
   PAYPAL
   CODI
+  MANUAL_TRANSFER
 }
 
 enum PaymentMethod {
