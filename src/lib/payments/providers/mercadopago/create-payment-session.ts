@@ -3,8 +3,7 @@ import type {
     CreatePaymentSessionResult,
 } from "@/lib/payments/types";
 import prisma from "@/lib/prisma";
-import { createMercadoPagoCardPayment } from "./create-card-payment";
-import { createMercadoPagoCashPayment } from "./create-cash-payment";
+import { PaymentProvider, PaymentStatus } from "@prisma/client";
 
 function normalizeMethod(value: unknown): string {
     return String(value ?? "")
@@ -43,8 +42,17 @@ export async function createMercadoPagoPaymentSession(
         where: { id: input.paymentId },
         select: {
             id: true,
-            method: true,
+            orderId: true,
             provider: true,
+            method: true,
+            status: true,
+            providerStatus: true,
+            externalPaymentId: true,
+            externalOrderId: true,
+            externalReference: true,
+            requestPayload: true,
+            responsePayload: true,
+            expiresAt: true,
         },
     });
 
@@ -52,17 +60,38 @@ export async function createMercadoPagoPaymentSession(
         throw new Error(`No se encontró el payment con id "${input.paymentId}"`);
     }
 
+    if (payment.orderId !== input.orderId) {
+        throw new Error(
+            `El payment "${input.paymentId}" no pertenece a la orden "${input.orderId}"`
+        );
+    }
+
+    if (payment.provider !== PaymentProvider.MERCADOPAGO) {
+        throw new Error(
+            `El payment "${input.paymentId}" no pertenece al provider Mercado Pago`
+        );
+    }
+
     const normalizedMethod = normalizeMethod(payment.method);
 
-    if (isCardMethod(normalizedMethod)) {
-        return await createMercadoPagoCardPayment(input);
+    if (!isCardMethod(normalizedMethod) && !isCashMethod(normalizedMethod)) {
+        throw new Error(
+            `Método de pago no soportado para Mercado Pago: "${String(payment.method)}"`
+        );
     }
 
-    if (isCashMethod(normalizedMethod)) {
-        return await createMercadoPagoCashPayment(input);
-    }
-
-    throw new Error(
-        `Método de pago no soportado para Mercado Pago: "${String(payment.method)}"`
-    );
+    return {
+        provider: payment.provider,
+        method: payment.method,
+        status: payment.status ?? PaymentStatus.PENDING,
+        providerStatus: payment.providerStatus,
+        externalPaymentId: payment.externalPaymentId,
+        externalOrderId: payment.externalOrderId,
+        externalReference: payment.externalReference,
+        requestPayload: payment.requestPayload,
+        responsePayload: payment.responsePayload,
+        expiresAt: payment.expiresAt,
+        checkoutSessionId: null,
+        approvalUrl: null,
+    };
 }

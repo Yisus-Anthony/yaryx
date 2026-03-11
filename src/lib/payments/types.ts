@@ -1,4 +1,8 @@
-import type { PaymentProvider, PaymentMethod, PaymentStatus } from "@prisma/client";
+import type {
+  PaymentMethod,
+  PaymentProvider,
+  PaymentStatus,
+} from "@prisma/client";
 
 export type CreatePaymentSessionInput = {
   paymentId: string;
@@ -42,7 +46,9 @@ export type ProcessWebhookResult = {
 
 export interface PaymentProviderAdapter {
   provider: PaymentProvider;
-  createPaymentSession(input: CreatePaymentSessionInput): Promise<CreatePaymentSessionResult>;
+  createPaymentSession(
+    input: CreatePaymentSessionInput
+  ): Promise<CreatePaymentSessionResult>;
   parseWebhook(request: Request, rawBody: string): Promise<ParsedWebhook>;
   verifyWebhookSignature(input: {
     request: Request;
