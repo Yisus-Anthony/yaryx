@@ -121,7 +121,7 @@ export async function createMercadoPagoCardPayment(
             paymentStatus: mappedStatus,
             status:
                 mappedStatus === PaymentStatus.APPROVED
-                    ? OrderStatus.CONFIRMED
+                    ? OrderStatus.PAID
                     : OrderStatus.AWAITING_PAYMENT,
         },
     });
