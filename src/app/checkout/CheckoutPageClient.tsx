@@ -11,6 +11,14 @@ import CardPaymentSection from "./_components/CardPaymentSection";
 import CashPaymentSection from "./_components/CashPaymentSection";
 import ManualSpeiSection from "./_components/ManualSpeiSection";
 
+function cldUrl(publicId: string) {
+  const cloud =
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
+    process.env.CLOUDINARY_CLOUD_NAME;
+
+  return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,w_300,c_fill/${publicId}`;
+}
+
 function money(n: number) {
   return new Intl.NumberFormat("es-MX", {
     style: "currency",
@@ -98,15 +106,20 @@ export default function CheckoutPageClient() {
               <div className={styles.items}>
                 {items.map((item: any) => (
                   <div key={item.id} className={styles.itemRow}>
-                    <div>
+                    <img
+                      src={cldUrl(item.product.coverPublicId)}
+                      alt={item.product.name}
+                      className={styles.itemImage}
+                    />
+
+                    <div className={styles.itemInfo}>
                       <div className={styles.itemName}>{item.product.name}</div>
                       <div className={styles.itemMeta}>
                         {item.quantity} × {money(Number(item.product.price))}
                       </div>
-                    </div>
-
-                    <div className={styles.itemStock}>
-                      Stock actual: {item.product.stock}
+                      <div className={styles.itemStock}>
+                        Stock actual: {item.product.stock}
+                      </div>
                     </div>
 
                     <div className={styles.itemTotal}>

@@ -14,6 +14,20 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
 
+        const email =
+            typeof body?.email === "string" ? body.email.trim() : "";
+        const customerName =
+            typeof body?.customerName === "string" ? body.customerName.trim() : "";
+        const customerPhone =
+            typeof body?.customerPhone === "string" ? body.customerPhone.trim() : "";
+
+        if (!email) {
+            return NextResponse.json(
+                { ok: false, error: "Falta el correo del cliente" },
+                { status: 400 }
+            );
+        }
+
         const { cart } = await validateCheckout({
             provider: PaymentProvider.MANUAL_TRANSFER,
         });
@@ -27,10 +41,10 @@ export async function POST(req: Request) {
             where: { id: order.id },
             data: {
                 status: OrderStatus.AWAITING_PAYMENT,
-                paymentStatus: PaymentStatus.REQUIRES_ACTION,
-                customerEmail: body.email ?? null,
-                customerName: body.customerName ?? null,
-                customerPhone: body.customerPhone ?? null,
+                paymentStatus: PaymentStatus.PENDING,
+                customerEmail: email,
+                customerName: customerName || null,
+                customerPhone: customerPhone || null,
                 notes: "Pago pendiente por transferencia SPEI manual.",
             },
         });
@@ -40,7 +54,7 @@ export async function POST(req: Request) {
                 orderId: order.id,
                 provider: PaymentProvider.MANUAL_TRANSFER,
                 method: PaymentMethod.BANK_TRANSFER,
-                status: PaymentStatus.REQUIRES_ACTION,
+                status: PaymentStatus.PENDING,
                 currency: order.currency,
                 amount: order.totalAmount,
                 externalReference: order.reference,
@@ -49,6 +63,8 @@ export async function POST(req: Request) {
                     bankName: MANUAL_BANK_TRANSFER.bankName,
                     clabe: MANUAL_BANK_TRANSFER.clabe,
                     accountHolder: MANUAL_BANK_TRANSFER.accountHolder,
+                    accountNumber: MANUAL_BANK_TRANSFER.accountNumber,
+                    cardReference: MANUAL_BANK_TRANSFER.cardReference,
                 },
             },
         });
@@ -62,14 +78,13 @@ export async function POST(req: Request) {
             bank: MANUAL_BANK_TRANSFER,
         });
     } catch (error) {
+        console.error("MANUAL TRANSFER ERROR:", error);
+
         const message =
             error instanceof Error
                 ? error.message
                 : "No se pudo generar la orden para transferencia";
 
-        return NextResponse.json(
-            { ok: false, error: message },
-            { status: 400 }
-        );
+        return NextResponse.json({ ok: false, error: message }, { status: 400 });
     }
 }

@@ -136,3 +136,46 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* === Mejora visual para productos en resumen === */
+
+.itemImage {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+.itemInfo {
+    min-width: 0;
+}
+
+/* Ajustamos la fila para que soporte imagen */
+.itemRow {
+    display: grid;
+    grid-template-columns: 64px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 920px) {
+    .itemRow {
+        grid-template-columns: 56px 1fr;
+        align-items: start;
+    }
+
+    .itemImage {
+        width: 56px;
+        height: 56px;
+    }
+
+    .itemTotal {
+        grid-column: 2;
+        margin-top: 4px;
+    }
+}
