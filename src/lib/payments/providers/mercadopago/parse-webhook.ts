@@ -1,55 +1,104 @@
 import type { ParsedWebhook } from "@/lib/payments/types";
-import { safeJsonParse } from "@/lib/utils/safe-json";
 
-function headersToObject(headers: Headers) {
-  const result: Record<string, string> = {};
-  headers.forEach((value, key) => {
-    result[key.toLowerCase()] = value;
-  });
-  return result;
+function getHeadersObject(request: Request): Record<string, string> {
+    const headers: Record<string, string> = {};
+
+    request.headers.forEach((value, key) => {
+        headers[key.toLowerCase()] = value;
+    });
+
+    return headers;
+}
+
+function getQueryObject(request: Request): Record<string, string> {
+    const url = new URL(request.url);
+    const query: Record<string, string> = {};
+
+    url.searchParams.forEach((value, key) => {
+        query[key] = value;
+    });
+
+    return query;
+}
+
+function tryParseJson(rawBody: string): unknown {
+    if (!rawBody || !rawBody.trim()) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(rawBody);
+    } catch {
+        return rawBody;
+    }
+}
+
+function getObjectValue(obj: unknown, path: string[]): string | null {
+    let current: unknown = obj;
+
+    for (const key of path) {
+        if (!current || typeof current !== "object" || !(key in current)) {
+            return null;
+        }
+
+        current = (current as Record<string, unknown>)[key];
+    }
+
+    if (current == null) {
+        return null;
+    }
+
+    return String(current);
 }
 
 export async function parseMercadoPagoWebhook(
-  request: Request,
-  rawBody: string
+    request: Request,
+    rawBody: string
 ): Promise<ParsedWebhook> {
-  const url = new URL(request.url);
-  const payload = safeJsonParse<any>(rawBody) ?? {};
+    const headers = getHeadersObject(request);
+    const query = getQueryObject(request);
+    const payload = tryParseJson(rawBody);
 
-  const query = Object.fromEntries(url.searchParams.entries());
-  const headers = headersToObject(request.headers);
+    const signature =
+        headers["x-signature"] ??
+        headers["x-signature-ts"] ??
+        headers["x-hub-signature"] ??
+        null;
 
-  const resourceId =
-    payload?.data?.id?.toString?.() ??
-    query["data.id"] ??
-    query["id"] ??
-    null;
+    const eventType =
+        getObjectValue(payload, ["action"]) ??
+        getObjectValue(payload, ["type"]) ??
+        query["type"] ??
+        query["topic"] ??
+        "unknown";
 
-  const resourceType =
-    payload?.type?.toString?.() ??
-    query["type"] ??
-    query["topic"] ??
-    null;
+    const resourceType =
+        getObjectValue(payload, ["type"]) ??
+        query["topic"] ??
+        query["type"] ??
+        null;
 
-  const eventType =
-    payload?.action?.toString?.() ??
-    resourceType ??
-    "unknown";
+    const resourceId =
+        getObjectValue(payload, ["data", "id"]) ??
+        getObjectValue(payload, ["id"]) ??
+        query["data.id"] ??
+        query["id"] ??
+        null;
 
-  const externalEventId =
-    headers["x-request-id"] ??
-    query["id"] ??
-    resourceId ??
-    null;
+    const externalEventId =
+        getObjectValue(payload, ["id"]) ??
+        headers["x-request-id"] ??
+        headers["x-idempotency-key"] ??
+        resourceId;
 
-  return {
-    externalEventId,
-    eventType,
-    resourceType,
-    resourceId,
-    signature: headers["x-signature"] ?? null,
-    headers,
-    payload,
-    query,
-  };
+    return {
+        externalEventId,
+        eventType,
+        resourceType,
+        resourceId,
+        signature,
+        headers,
+        payload,
+        query,
+    };
 }

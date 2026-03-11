@@ -2,8 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useCart } from "@/components/cart/CartProvider";
+import styles from "./CheckoutPageClient.module.css";
+import CheckoutCustomerForm, {
+  type CheckoutCustomerData,
+} from "./_components/CheckoutCustomerForm";
+import CardPaymentSection from "./_components/CardPaymentSection";
+import CashPaymentSection from "./_components/CashPaymentSection";
+import ManualSpeiSection from "./_components/ManualSpeiSection";
 
 function money(n: number) {
   return new Intl.NumberFormat("es-MX", {
@@ -12,239 +18,135 @@ function money(n: number) {
   }).format(n);
 }
 
-export default function CheckoutPageClient() {
-  const { cart, totals, loading, refresh } = useCart();
-  const searchParams = useSearchParams();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+type UiMessage = {
+  type: "success" | "warning" | "error";
+  text: string;
+} | null;
 
-  const status = searchParams.get("status");
-  const reference = searchParams.get("reference");
+export default function CheckoutPageClient() {
+  const { cart, totals, loading } = useCart();
+  const [message, setMessage] = useState<UiMessage>(null);
+
+  const [customer, setCustomer] = useState<CheckoutCustomerData>({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   const items = cart?.items ?? [];
 
-  const statusMessage = useMemo(() => {
-    if (!status) return null;
+  const bannerClass = useMemo(() => {
+    if (!message) return "";
+    if (message.type === "success") return styles.bannerOk;
+    if (message.type === "warning") return styles.bannerWarn;
+    return styles.bannerErr;
+  }, [message]);
 
-    if (status === "success") {
-      return {
-        type: "ok" as const,
-        text: `Pago iniciado/retornado correctamente. Referencia: ${reference ?? "-"}. La confirmación final depende del webhook.`,
-      };
-    }
-
-    if (status === "pending") {
-      return {
-        type: "warn" as const,
-        text: `Pago pendiente. Referencia: ${reference ?? "-"}`,
-      };
-    }
-
-    if (status === "failure") {
-      return {
-        type: "err" as const,
-        text: `El pago no se completó. Referencia: ${reference ?? "-"}`,
-      };
-    }
-
-    return null;
-  }, [status, reference]);
-
-  async function handlePay() {
-    setBusy(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          provider: "MERCADOPAGO",
-        }),
-      });
-
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok || !data?.ok) {
-        throw new Error(data?.error ?? "No se pudo iniciar el checkout");
-      }
-
-      if (!data?.redirectUrl) {
-        throw new Error("Mercado Pago no devolvió una URL de pago");
-      }
-
-      await refresh();
-      window.location.href = data.redirectUrl;
-    } catch (e: any) {
-      setError(e?.message ?? "Error iniciando pago");
-    } finally {
-      setBusy(false);
-    }
+  function handleResult(result: {
+    type: "success" | "error";
+    message: string;
+  }) {
+    setMessage({
+      type: result.type === "success" ? "success" : "error",
+      text: result.message,
+    });
   }
 
   if (loading) {
-    return <div style={{ padding: 24 }}>Cargando checkout…</div>;
+    return <div className={styles.page}>Cargando checkout…</div>;
   }
 
   return (
-    <main style={{ maxWidth: 1000, margin: "40px auto", padding: 16 }}>
-      <div
-        style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
-      >
+    <main className={styles.page}>
+      <div className={styles.topbar}>
         <h1>Checkout</h1>
-        <Link href="/cart">← Volver al carrito</Link>
+        <Link href="/cart" className={styles.backLink}>
+          ← Volver al carrito
+        </Link>
       </div>
 
-      {statusMessage ? (
-        <div
-          style={{
-            marginTop: 16,
-            padding: 12,
-            borderRadius: 10,
-            border: "1px solid #ddd",
-            background:
-              statusMessage.type === "ok"
-                ? "#ecfdf5"
-                : statusMessage.type === "warn"
-                  ? "#fffbeb"
-                  : "#fef2f2",
-          }}
-        >
-          {statusMessage.text}
-        </div>
+      {message ? (
+        <div className={`${styles.banner} ${bannerClass}`}>{message.text}</div>
       ) : null}
 
       {!items.length ? (
-        <div style={{ marginTop: 24 }}>
+        <div className={styles.empty}>
           Tu carrito está vacío. <Link href="/products">Ir a productos</Link>
         </div>
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1.5fr 1fr",
-            gap: 24,
-            marginTop: 24,
-          }}
-        >
-          <section
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: 14,
-              padding: 16,
-            }}
-          >
-            <h2 style={{ marginBottom: 16 }}>Resumen</h2>
+        <div className={styles.grid}>
+          <div className={styles.left}>
+            <CheckoutCustomerForm value={customer} onChange={setCustomer} />
 
-            <div style={{ display: "grid", gap: 12 }}>
-              {items.map((item: any) => (
-                <div
-                  key={item.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto auto",
-                    gap: 12,
-                    alignItems: "center",
-                    borderBottom: "1px solid #f3f4f6",
-                    paddingBottom: 12,
-                  }}
-                >
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{item.product.name}</div>
-                    <div style={{ fontSize: 13, opacity: 0.75 }}>
-                      {item.quantity} × {money(Number(item.product.price))}
+            <div className={styles.methods}>
+              <CardPaymentSection
+                amount={totals.subtotal}
+                customer={customer}
+                onResult={handleResult}
+              />
+
+              <CashPaymentSection customer={customer} onResult={handleResult} />
+
+              <ManualSpeiSection customer={customer} onResult={handleResult} />
+            </div>
+          </div>
+
+          <aside className={styles.right}>
+            <section className={styles.card}>
+              <h2 className={styles.sectionTitle}>Resumen del pedido</h2>
+
+              <div className={styles.items}>
+                {items.map((item: any) => (
+                  <div key={item.id} className={styles.itemRow}>
+                    <div>
+                      <div className={styles.itemName}>{item.product.name}</div>
+                      <div className={styles.itemMeta}>
+                        {item.quantity} × {money(Number(item.product.price))}
+                      </div>
+                    </div>
+
+                    <div className={styles.itemStock}>
+                      Stock actual: {item.product.stock}
+                    </div>
+
+                    <div className={styles.itemTotal}>
+                      {money(Number(item.product.price) * item.quantity)}
                     </div>
                   </div>
+                ))}
+              </div>
+            </section>
 
-                  <div style={{ fontSize: 13, opacity: 0.75 }}>
-                    Stock actual: {item.product.stock}
-                  </div>
+            <section className={styles.card}>
+              <h2 className={styles.sectionTitle}>Totales</h2>
 
-                  <div style={{ fontWeight: 700 }}>
-                    {money(Number(item.product.price) * item.quantity)}
-                  </div>
+              <div className={styles.summaryRows}>
+                <div className={styles.summaryRow}>
+                  <span>Artículos</span>
+                  <strong>{totals.count}</strong>
                 </div>
-              ))}
-            </div>
-          </section>
 
-          <aside
-            style={{
-              border: "1px solid #e5e7eb",
-              borderRadius: 14,
-              padding: 16,
-              height: "fit-content",
-            }}
-          >
-            <h2 style={{ marginBottom: 16 }}>Pago</h2>
+                <div className={styles.summaryRow}>
+                  <span>Subtotal</span>
+                  <strong>{money(totals.subtotal)}</strong>
+                </div>
 
-            <div style={{ display: "grid", gap: 10 }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Artículos</span>
-                <strong>{totals.count}</strong>
+                <div className={styles.summaryRow}>
+                  <span>Envío</span>
+                  <strong>{money(0)}</strong>
+                </div>
+
+                <div className={styles.summaryRow}>
+                  <span>Total</span>
+                  <strong>{money(totals.subtotal)}</strong>
+                </div>
               </div>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Subtotal</span>
-                <strong>{money(totals.subtotal)}</strong>
+              <div className={styles.infoBox}>
+                Se valida stock antes de crear la orden. El descuento definitivo
+                de inventario debe ejecutarse cuando el pago quede confirmado.
               </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Envío</span>
-                <strong>{money(0)}</strong>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Total</span>
-                <strong>{money(totals.subtotal)}</strong>
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 14,
-                padding: 12,
-                borderRadius: 10,
-                background: "#f9fafb",
-                fontSize: 14,
-              }}
-            >
-              Se validará stock antes de crear la orden y el descuento de stock
-              se hace al confirmar el pago.
-            </div>
-
-            {error ? (
-              <div
-                style={{
-                  marginTop: 12,
-                  color: "#b91c1c",
-                  fontSize: 14,
-                }}
-              >
-                {error}
-              </div>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={handlePay}
-              disabled={busy}
-              style={{
-                marginTop: 16,
-                width: "100%",
-                padding: "12px 14px",
-                borderRadius: 12,
-                border: "1px solid #111827",
-                background: "#111827",
-                color: "#fff",
-                fontWeight: 700,
-                cursor: busy ? "not-allowed" : "pointer",
-              }}
-            >
-              {busy ? "Redirigiendo..." : "Pagar con Mercado Pago"}
-            </button>
+            </section>
           </aside>
         </div>
       )}

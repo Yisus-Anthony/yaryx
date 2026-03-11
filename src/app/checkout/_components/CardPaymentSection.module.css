@@ -1,0 +1,39 @@
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 20px;
+    background: #fff;
+}
+
+.header {
+    margin-bottom: 16px;
+}
+
+.header h2 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+}
+
+.header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.notice {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 0.94rem;
+    margin-bottom: 14px;
+}
+
+.container {
+    min-height: 180px;
+}
+
+.hiddenContainer {
+    min-height: 180px;
+    opacity: 0.45;
+}

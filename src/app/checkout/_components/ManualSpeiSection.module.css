@@ -1,0 +1,60 @@
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 20px;
+    background: #fff;
+}
+
+.header {
+    margin-bottom: 16px;
+}
+
+.header h2 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+}
+
+.header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.button {
+    width: 100%;
+    border: 1px solid #0f172a;
+    background: #fff;
+    color: #0f172a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.notice {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 0.94rem;
+}
+
+.instructions {
+    margin-top: 14px;
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    background: #f9fafb;
+}
+
+.listBlock ul {
+    margin: 10px 0 0;
+    padding-left: 18px;
+}

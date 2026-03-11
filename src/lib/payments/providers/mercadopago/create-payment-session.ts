@@ -1,70 +1,68 @@
-import prisma from "@/lib/prisma";
-import { env } from "@/server/env";
-import type { CreatePaymentSessionInput, CreatePaymentSessionResult } from "@/lib/payments/types";
-import { PaymentProvider, PaymentStatus } from "@prisma/client";
-import { createPreference } from "./client";
+import type {
+    CreatePaymentSessionInput,
+    CreatePaymentSessionResult,
+} from "@/lib/payments/types";
+import { prisma } from "@/lib/prisma";
+import { createMercadoPagoCardPayment } from "./create-card-payment";
+import { createMercadoPagoCashPayment } from "./create-cash-payment";
+
+function normalizeMethod(value: unknown) {
+    return String(value ?? "")
+        .trim()
+        .toUpperCase()
+        .replace(/[\s-]+/g, "_");
+}
+
+function isCardMethod(method: string) {
+    return [
+        "CARD",
+        "CREDIT_CARD",
+        "DEBIT_CARD",
+        "CREDIT",
+        "DEBIT",
+    ].includes(method);
+}
+
+function isCashMethod(method: string) {
+    return [
+        "CASH",
+        "OXXO",
+        "OXXO_PAY",
+        "TICKET",
+        "PAYCASH",
+        "ATM",
+        "STORE",
+        "CONVENIENCE_STORE",
+    ].includes(method);
+}
 
 export async function createMercadoPagoPaymentSession(
-  input: CreatePaymentSessionInput
+    input: CreatePaymentSessionInput
 ): Promise<CreatePaymentSessionResult> {
-  const order = await prisma.order.findUnique({
-    where: { id: input.orderId },
-    include: { items: true },
-  });
+    const payment = await prisma.payment.findUnique({
+        where: { id: input.paymentId },
+        select: {
+            id: true,
+            method: true,
+            provider: true,
+        },
+    });
 
-  if (!order) {
-    throw new Error("Order not found");
-  }
+    if (!payment) {
+        throw new Error(`No se encontró el payment con id "${input.paymentId}"`);
+    }
 
-  const successUrl = `${env.appUrl}/checkout?status=success&reference=${encodeURIComponent(
-    order.reference
-  )}`;
-  const pendingUrl = `${env.appUrl}/checkout?status=pending&reference=${encodeURIComponent(
-    order.reference
-  )}`;
-  const failureUrl = `${env.appUrl}/checkout?status=failure&reference=${encodeURIComponent(
-    order.reference
-  )}`;
-  const notificationUrl = `${env.appUrl}/api/webhooks/mercadopago`;
+    const normalizedMethod = normalizeMethod(payment.method);
 
-  const payload = {
-    external_reference: order.reference,
-    notification_url: notificationUrl,
-    back_urls: {
-      success: successUrl,
-      pending: pendingUrl,
-      failure: failureUrl,
-    },
+    if (isCardMethod(normalizedMethod)) {
+        return createMercadoPagoCardPayment(input);
+    }
 
-    items: order.items.map((item) => ({
-      id: item.productId ?? item.id,
-      title: item.productName,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      currency_id: order.currency,
-      category_id: item.productCategory,
-      description: item.productSlug,
-    })),
-    metadata: {
-      orderId: order.id,
-      paymentId: input.paymentId,
-      reference: order.reference,
-    },
-  };
+    if (isCashMethod(normalizedMethod)) {
+        return createMercadoPagoCashPayment(input);
+    }
 
-  const response = await createPreference(payload);
-
-  return {
-    provider: PaymentProvider.MERCADOPAGO,
-    status: PaymentStatus.PENDING,
-    providerStatus: "preference_created",
-    externalReference: order.reference,
-    checkoutSessionId: response.id,
-    approvalUrl: response.init_point ?? response.sandbox_init_point ?? null,
-    requestPayload: payload,
-    responsePayload: response,
-    expiresAt: response.date_of_expiration
-      ? new Date(response.date_of_expiration)
-      : null,
-  };
+    throw new Error(
+        `Método de pago no soportado para Mercado Pago: "${String(payment.method)}"`
+    );
 }

@@ -1,0 +1,50 @@
+.card {
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    padding: 20px;
+    background: #fff;
+}
+
+.header {
+    margin-bottom: 16px;
+}
+
+.header h2 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+}
+
+.header p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.grid {
+    display: grid;
+    gap: 14px;
+}
+
+.field {
+    display: grid;
+    gap: 8px;
+}
+
+.field span {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+.field input {
+    width: 100%;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 12px 14px;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.field input:focus {
+    border-color: #111827;
+}

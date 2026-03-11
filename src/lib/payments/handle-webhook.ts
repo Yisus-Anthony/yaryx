@@ -12,13 +12,13 @@ export async function handleWebhook(provider: PaymentProvider, request: Request)
   const existing =
     parsed.externalEventId
       ? await prisma.paymentWebhookEvent.findUnique({
-          where: {
-            provider_externalEventId: {
-              provider,
-              externalEventId: parsed.externalEventId,
-            },
+        where: {
+          provider_externalEventId: {
+            provider,
+            externalEventId: parsed.externalEventId,
           },
-        })
+        },
+      })
       : null;
 
   if (existing) {

@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
-import type { ParsedWebhook, ProcessWebhookResult } from "@/lib/payments/types";
-import { PaymentStatus } from "@prisma/client";
+import type {
+  ParsedWebhook,
+  ProcessWebhookResult,
+} from "@/lib/payments/types";
+import { PaymentProvider, PaymentStatus } from "@prisma/client";
 import { getPaymentById } from "./client";
 import {
   mapMercadoPagoMethod,
@@ -26,8 +29,8 @@ export async function processMercadoPagoWebhook(input: {
   }
 
   const paymentData = await getPaymentById(paymentId);
-
   const externalReference = paymentData.external_reference;
+
   if (!externalReference) {
     return {
       ignored: true,
@@ -46,29 +49,45 @@ export async function processMercadoPagoWebhook(input: {
   }
 
   const internalStatus = mapMercadoPagoStatus(paymentData.status);
-  const internalMethod = mapMercadoPagoMethod(paymentData.payment_type_id);
+  const internalMethod = mapMercadoPagoMethod(
+    paymentData.payment_type_id,
+    paymentData.payment_method_id
+  );
 
   let payment = order.payments.find(
     (p) =>
       p.externalPaymentId === String(paymentData.id) ||
-      p.checkoutSessionId === input.parsed.query["preference_id"] ||
-      p.externalReference === externalReference
+      p.externalReference === externalReference ||
+      (
+        input.parsed.query?.["preference_id"] &&
+        p.checkoutSessionId === input.parsed.query["preference_id"]
+      )
   );
 
   if (!payment) {
     payment = await prisma.payment.create({
       data: {
         orderId: order.id,
-        provider: "MERCADOPAGO",
+        provider: PaymentProvider.MERCADOPAGO,
         status: internalStatus,
         method: internalMethod,
         currency: order.currency,
         amount: order.totalAmount,
         externalPaymentId: String(paymentData.id),
-        externalOrderId: paymentData.order?.id ? String(paymentData.order.id) : null,
+        externalOrderId: paymentData.order?.id
+          ? String(paymentData.order.id)
+          : null,
         externalReference,
         providerStatus: paymentData.status ?? null,
-        approvedAt: paymentData.date_approved ? new Date(paymentData.date_approved) : null,
+        approvedAt: paymentData.date_approved
+          ? new Date(paymentData.date_approved)
+          : null,
+        failedAt:
+          internalStatus === PaymentStatus.FAILED ? new Date() : null,
+        cancelledAt:
+          internalStatus === PaymentStatus.CANCELLED ? new Date() : null,
+        refundedAt:
+          internalStatus === PaymentStatus.REFUNDED ? new Date() : null,
         responsePayload: paymentData as any,
       },
     });
@@ -80,12 +99,25 @@ export async function processMercadoPagoWebhook(input: {
         method: internalMethod,
         providerStatus: paymentData.status ?? null,
         externalPaymentId: String(paymentData.id),
-        externalOrderId: paymentData.order?.id ? String(paymentData.order.id) : null,
+        externalOrderId: paymentData.order?.id
+          ? String(paymentData.order.id)
+          : null,
         externalReference,
-        approvedAt: paymentData.date_approved ? new Date(paymentData.date_approved) : null,
-        failedAt: internalStatus === PaymentStatus.FAILED ? new Date() : null,
-        cancelledAt: internalStatus === PaymentStatus.CANCELLED ? new Date() : null,
-        refundedAt: internalStatus === PaymentStatus.REFUNDED ? new Date() : null,
+        approvedAt: paymentData.date_approved
+          ? new Date(paymentData.date_approved)
+          : null,
+        failedAt:
+          internalStatus === PaymentStatus.FAILED
+            ? payment.failedAt ?? new Date()
+            : null,
+        cancelledAt:
+          internalStatus === PaymentStatus.CANCELLED
+            ? payment.cancelledAt ?? new Date()
+            : null,
+        refundedAt:
+          internalStatus === PaymentStatus.REFUNDED
+            ? payment.refundedAt ?? new Date()
+            : null,
         responsePayload: paymentData as any,
       },
     });
