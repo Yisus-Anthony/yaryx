@@ -27,18 +27,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const email = String(credentials?.email ?? "")
                     .trim()
                     .toLowerCase();
+
                 const password = String(credentials?.password ?? "");
 
-                if (!email || !password) return null;
+                if (!email || !password) {
+                    return null;
+                }
 
                 const user = await prisma.user.findUnique({
                     where: { email },
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        role: true,
+                        isActive: true,
+                        passwordHash: true,
+                    },
                 });
 
-                if (!user || !user.isActive) return null;
+                if (!user || !user.isActive) {
+                    return null;
+                }
 
-                const validPassword = await bcrypt.compare(password, user.passwordHash);
-                if (!validPassword) return null;
+                const validPassword = await bcrypt.compare(
+                    password,
+                    user.passwordHash
+                );
+
+                if (!validPassword) {
+                    return null;
+                }
 
                 return {
                     id: user.id,
@@ -52,31 +71,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                token.role = (user as { role?: string }).role;
+                token.sub = String(user.id);
+                token.role = String((user as { role?: string }).role ?? "");
             }
+
             return token;
         },
+
         async session({ session, token }) {
             if (session.user) {
                 session.user.id = String(token.sub ?? "");
                 session.user.role = String(token.role ?? "");
             }
+
             return session;
         },
-        async authorized({ auth, request }) {
-            const pathname = request.nextUrl.pathname;
-
-            // permitir login siempre
-            if (pathname === "/admin/login") {
-                return true;
-            }
-
-            // proteger admin
-            if (pathname.startsWith("/admin")) {
-                return !!auth?.user && auth.user.role === "ADMIN";
-            }
-
-            return true;
-        }
     },
 });

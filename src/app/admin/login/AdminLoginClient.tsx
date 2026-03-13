@@ -68,7 +68,7 @@ export default function AdminLoginClient({ callbackUrl }: Props) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@tusitio.com"
+            placeholder="tu-correo@gmail.com"
             required
             style={{
               height: 44,
