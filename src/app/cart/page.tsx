@@ -102,6 +102,10 @@ export default function CartPage() {
               Continuar a pago
             </button>
 
+            <Link href="/products" className={styles.continueBtn}>
+              Seguir comprando
+            </Link>
+
             <div className={styles.note}>
               Al continuar, validaremos stock antes de generar el pago.
             </div>

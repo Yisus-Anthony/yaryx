@@ -166,3 +166,13 @@
         margin-top: 8px;
     }
 }
+
+.continueBtn {
+    display: block;
+    margin-top: 12px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    border: 1px solid #ccc;
+}
