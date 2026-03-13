@@ -5,7 +5,7 @@ import ProductsToolbar from "./_components/ProductsToolbar";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 50;
 
 type ProductsPageProps = {
   searchParams?: {
