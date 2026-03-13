@@ -75,6 +75,13 @@
     font-size: 13px;
 }
 
+.price {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #22c55e;
+}
+
 /* ================= BOTÓN ATRÁS ================= */
 
 .backButton {
@@ -100,19 +107,39 @@
 .pagination {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 12px;
+    flex-wrap: wrap;
     margin-top: 20px;
 }
 
-.pageBtn {
-    display: inline-block;
-    padding: 10px 14px;
+.pageNumbers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pageBtn,
+.pageBtnDisabled,
+.pageBtnActive {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    height: 42px;
+    padding: 0 14px;
     border-radius: 10px;
-    background: #000;
-    color: #fff;
     text-decoration: none;
     font-size: 14px;
+    font-weight: 600;
+    box-sizing: border-box;
+}
+
+.pageBtn {
+    background: #000;
+    color: #fff;
     transition: transform 0.1s ease, background 0.2s ease;
 }
 
@@ -122,12 +149,26 @@
 }
 
 .pageBtnDisabled {
-    display: inline-block;
-    padding: 10px 14px;
-    border-radius: 10px;
     background: rgba(0, 0, 0, 0.25);
     color: rgba(255, 255, 255, 0.7);
-    font-size: 14px;
+    cursor: not-allowed;
+}
+
+.pageBtnActive {
+    background: #fff;
+    color: #000;
+    border: 1px solid #000;
+}
+
+.pageDots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 42px;
+    font-size: 16px;
+    font-weight: 700;
+    opacity: 0.7;
 }
 
 .pageInfo {
@@ -219,9 +260,28 @@
     font-size: 20px;
 }
 
-.price {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 700;
-    color: #22c55e;
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 640px) {
+    .pagination {
+        gap: 10px;
+    }
+
+    .pageBtn,
+    .pageBtnDisabled,
+    .pageBtnActive {
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        font-size: 13px;
+    }
+
+    .pageDots {
+        height: 38px;
+        min-width: 24px;
+    }
+
+    .title {
+        font-size: 24px;
+    }
 }

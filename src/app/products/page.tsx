@@ -4,13 +4,6 @@ import AddToCartButton from "@/components/cart/AddToCartButton";
 import ProductsFilters from "./_components/ProductsFilters";
 import { getProductFiltersMeta, getProducts } from "@/lib/services/products";
 
-type SearchParams = {
-  page?: string;
-  condition?: string;
-  category?: string;
-  vehicleType?: string;
-};
-
 type ProductsPageProps = {
   searchParams?: {
     page?: string;
@@ -32,13 +25,48 @@ function cldUrl(publicId: string): string {
   return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,w_500,c_fill/${publicId}`;
 }
 
+function getPaginationItems(
+  currentPage: number,
+  totalPages: number,
+): Array<number | "..."> {
+  if (totalPages <= 7) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+
+  if (currentPage <= 4) {
+    return [1, 2, 3, 4, 5, "...", totalPages];
+  }
+
+  if (currentPage >= totalPages - 3) {
+    return [
+      1,
+      "...",
+      totalPages - 4,
+      totalPages - 3,
+      totalPages - 2,
+      totalPages - 1,
+      totalPages,
+    ];
+  }
+
+  return [
+    1,
+    "...",
+    currentPage - 1,
+    currentPage,
+    currentPage + 1,
+    "...",
+    totalPages,
+  ];
+}
+
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
   const params = searchParams ?? {};
 
-  const pageParam = Number(params.page ?? "1");
-  const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
+  const parsedPage = Number(params.page ?? "1");
+  const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   const condition = (params.condition ?? "all").toLowerCase();
   const category = (params.category ?? "all").toLowerCase();
@@ -51,8 +79,8 @@ export default async function ProductsPage({
 
   const visible = data.items;
   const total = data.total;
-  const totalPages = data.totalPages;
-  const currentPage = data.page;
+  const totalPages = Math.max(1, data.totalPages);
+  const currentPage = Math.min(Math.max(1, data.page), totalPages);
 
   const prevPage = currentPage > 1 ? currentPage - 1 : null;
   const nextPage = currentPage < totalPages ? currentPage + 1 : null;
@@ -79,6 +107,8 @@ export default async function ProductsPage({
     const qs = urlParams.toString();
     return qs ? `/products?${qs}` : "/products";
   }
+
+  const paginationItems = getPaginationItems(currentPage, totalPages);
 
   return (
     <section className={styles.wrapper}>
@@ -130,43 +160,68 @@ export default async function ProductsPage({
         </div>
       )}
 
-      <div className={styles.pagination}>
-        {prevPage ? (
-          <Link
-            className={styles.pageBtn}
-            href={buildUrl({
-              page: prevPage,
-              condition,
-              category,
-              vehicleType,
-            })}
-          >
-            ← Anterior
-          </Link>
-        ) : (
-          <span className={styles.pageBtnDisabled}>← Anterior</span>
-        )}
+      {total > 0 && totalPages > 1 && (
+        <div className={styles.pagination}>
+          {prevPage ? (
+            <Link
+              className={styles.pageBtn}
+              href={buildUrl({
+                page: prevPage,
+                condition,
+                category,
+                vehicleType,
+              })}
+            >
+              ← Anterior
+            </Link>
+          ) : (
+            <span className={styles.pageBtnDisabled}>← Anterior</span>
+          )}
 
-        <span className={styles.pageInfo}>
-          Página {currentPage} de {totalPages}
-        </span>
+          <div className={styles.pageNumbers}>
+            {paginationItems.map((item, index) =>
+              item === "..." ? (
+                <span key={`dots-${index}`} className={styles.pageDots}>
+                  ...
+                </span>
+              ) : item === currentPage ? (
+                <span key={item} className={styles.pageBtnActive}>
+                  {item}
+                </span>
+              ) : (
+                <Link
+                  key={item}
+                  className={styles.pageBtn}
+                  href={buildUrl({
+                    page: item,
+                    condition,
+                    category,
+                    vehicleType,
+                  })}
+                >
+                  {item}
+                </Link>
+              ),
+            )}
+          </div>
 
-        {nextPage ? (
-          <Link
-            className={styles.pageBtn}
-            href={buildUrl({
-              page: nextPage,
-              condition,
-              category,
-              vehicleType,
-            })}
-          >
-            Siguiente →
-          </Link>
-        ) : (
-          <span className={styles.pageBtnDisabled}>Siguiente →</span>
-        )}
-      </div>
+          {nextPage ? (
+            <Link
+              className={styles.pageBtn}
+              href={buildUrl({
+                page: nextPage,
+                condition,
+                category,
+                vehicleType,
+              })}
+            >
+              Siguiente →
+            </Link>
+          ) : (
+            <span className={styles.pageBtnDisabled}>Siguiente →</span>
+          )}
+        </div>
+      )}
     </section>
   );
 }

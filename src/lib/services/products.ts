@@ -16,7 +16,7 @@ type CategoryTreeNode = {
     children: CategoryTreeNode[];
 };
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 20;
 
 const CONDITION_ORDER = ["nuevo", "usado", "remanufacturado"] as const;
 
@@ -133,6 +133,7 @@ export async function getProducts({
         total,
         page: currentPage,
         totalPages,
+        pageSize: PAGE_SIZE,
     };
 }
 
