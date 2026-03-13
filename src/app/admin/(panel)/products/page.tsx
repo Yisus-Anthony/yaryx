@@ -1,35 +1,100 @@
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import styles from "./styles.module.css";
+import ProductsToolbar from "./_components/ProductsToolbar";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 10;
+
+type ProductsPageProps = {
+  searchParams?: {
+    page?: string;
+    q?: string;
+    category?: string;
+    sort?: string;
+  };
+};
+
+function getSortOrder(sort?: string) {
+  switch (sort) {
+    case "name-asc":
+      return [{ name: "asc" as const }];
+    case "name-desc":
+      return [{ name: "desc" as const }];
+    case "price-asc":
+      return [{ price: "asc" as const }];
+    case "price-desc":
+      return [{ price: "desc" as const }];
+    case "updated-asc":
+      return [{ updatedAt: "asc" as const }];
+    case "updated-desc":
+    default:
+      return [{ updatedAt: "desc" as const }];
+  }
+}
 
 export default async function AdminProductsPage({
   searchParams,
-}: {
-  searchParams?: { page?: string };
-}) {
+}: ProductsPageProps) {
   const currentPage = Math.max(1, Number(searchParams?.page ?? "1") || 1);
+  const query = searchParams?.q?.trim() ?? "";
+  const category = searchParams?.category?.trim() ?? "";
+  const sort = searchParams?.sort?.trim() ?? "updated-desc";
 
-  const totalItems = await prisma.product.count();
+  const where = {
+    ...(query
+      ? {
+          OR: [
+            { name: { contains: query, mode: "insensitive" as const } },
+            { sku: { contains: query, mode: "insensitive" as const } },
+            { slug: { contains: query, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+    ...(category ? { categoryId: category } : {}),
+  };
 
-  const items = await prisma.product.findMany({
-    orderBy: { updatedAt: "desc" },
-    skip: (currentPage - 1) * PAGE_SIZE,
-    take: PAGE_SIZE,
-    include: {
-      category: true,
-      vehicleTypes: {
-        include: {
-          vehicleType: true,
+  const [categories, totalItems, items] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+      },
+    }),
+    prisma.product.count({ where }),
+    prisma.product.findMany({
+      where,
+      orderBy: getSortOrder(sort),
+      skip: (currentPage - 1) * PAGE_SIZE,
+      take: PAGE_SIZE,
+      include: {
+        category: true,
+        vehicleTypes: {
+          include: {
+            vehicleType: true,
+          },
         },
       },
-    },
-  });
+    }),
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+
+  const buildPageHref = (page: number) => {
+    const params = new URLSearchParams();
+
+    if (query) params.set("q", query);
+    if (category) params.set("category", category);
+    if (sort) params.set("sort", sort);
+    params.set("page", String(page));
+
+    return `/admin/products?${params.toString()}`;
+  };
+
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(currentPage * PAGE_SIZE, totalItems);
 
   return (
     <main className={styles.page}>
@@ -54,11 +119,18 @@ export default async function AdminProductsPage({
           <div>
             <h2 className={styles.cardTitle}>Lista de productos</h2>
             <p className={styles.cardDescription}>
-              {totalItems} {totalItems === 1 ? "producto" : "productos"}{" "}
-              registrados
+              Mostrando {startItem}-{endItem} de {totalItems}{" "}
+              {totalItems === 1 ? "producto" : "productos"}
             </p>
           </div>
         </div>
+
+        <ProductsToolbar
+          categories={categories}
+          initialQuery={query}
+          initialCategory={category}
+          initialSort={sort}
+        />
 
         <div className={styles.tableScroll}>
           <table className={styles.table}>
@@ -155,13 +227,13 @@ export default async function AdminProductsPage({
                 <tr>
                   <td colSpan={8}>
                     <div className={styles.emptyState}>
-                      <h3>No hay productos</h3>
-                      <p>Todavía no has agregado productos al catálogo.</p>
+                      <h3>No hay resultados</h3>
+                      <p>No encontramos productos con los filtros actuales.</p>
                       <Link
-                        href="/admin/products/new"
+                        href="/admin/products"
                         className={styles.primaryButton}
                       >
-                        Crear primer producto
+                        Limpiar filtros
                       </Link>
                     </div>
                   </td>
@@ -178,37 +250,27 @@ export default async function AdminProductsPage({
             </div>
 
             <div className={styles.paginationActions}>
-              <Link
-                href={
-                  currentPage > 1
-                    ? `/admin/products?page=${currentPage - 1}`
-                    : "#"
-                }
-                className={
-                  currentPage > 1
-                    ? styles.secondaryButton
-                    : styles.disabledButton
-                }
-                aria-disabled={currentPage <= 1}
-              >
-                Anterior
-              </Link>
+              {currentPage > 1 ? (
+                <Link
+                  href={buildPageHref(currentPage - 1)}
+                  className={styles.secondaryButton}
+                >
+                  Anterior
+                </Link>
+              ) : (
+                <span className={styles.disabledButton}>Anterior</span>
+              )}
 
-              <Link
-                href={
-                  currentPage < totalPages
-                    ? `/admin/products?page=${currentPage + 1}`
-                    : "#"
-                }
-                className={
-                  currentPage < totalPages
-                    ? styles.secondaryButton
-                    : styles.disabledButton
-                }
-                aria-disabled={currentPage >= totalPages}
-              >
-                Siguiente
-              </Link>
+              {currentPage < totalPages ? (
+                <Link
+                  href={buildPageHref(currentPage + 1)}
+                  className={styles.secondaryButton}
+                >
+                  Siguiente
+                </Link>
+              ) : (
+                <span className={styles.disabledButton}>Siguiente</span>
+              )}
             </div>
           </div>
         )}
