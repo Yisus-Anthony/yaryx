@@ -1,12 +1,14 @@
 import Link from "next/link";
 import styles from "./products.module.css";
 import AddToCartButton from "@/components/cart/AddToCartButton";
-import { getProductCategories, getProducts } from "@/lib/services/products";
+import ProductsFilters from "./_components/ProductsFilters";
+import { getProductFiltersMeta, getProducts } from "@/lib/services/products";
 
 type SearchParams = {
   page?: string;
   condition?: string;
   category?: string;
+  vehicleType?: string;
 };
 
 type ProductsPageProps = {
@@ -17,6 +19,7 @@ type BuildUrlParams = {
   page?: number;
   condition?: string;
   category?: string;
+  vehicleType?: string;
 };
 
 function cldUrl(publicId: string): string {
@@ -34,10 +37,11 @@ export default async function ProductsPage({
 
   const condition = (params.condition ?? "all").toLowerCase();
   const category = (params.category ?? "all").toLowerCase();
+  const vehicleType = (params.vehicleType ?? "all").toLowerCase();
 
-  const [data, categories] = await Promise.all([
-    getProducts({ page, condition, category }),
-    getProductCategories(),
+  const [data, filtersMeta] = await Promise.all([
+    getProducts({ page, condition, category, vehicleType }),
+    getProductFiltersMeta(),
   ]);
 
   const visible = data.items;
@@ -49,21 +53,25 @@ export default async function ProductsPage({
   const nextPage = currentPage < totalPages ? currentPage + 1 : null;
 
   function buildUrl(next: BuildUrlParams): string {
-    const params = new URLSearchParams();
+    const urlParams = new URLSearchParams();
 
     if (next.page && next.page > 1) {
-      params.set("page", String(next.page));
+      urlParams.set("page", String(next.page));
     }
 
     if (next.condition && next.condition !== "all") {
-      params.set("condition", next.condition);
+      urlParams.set("condition", next.condition);
+    }
+
+    if (next.vehicleType && next.vehicleType !== "all") {
+      urlParams.set("vehicleType", next.vehicleType);
     }
 
     if (next.category && next.category !== "all") {
-      params.set("category", next.category);
+      urlParams.set("category", next.category);
     }
 
-    const qs = params.toString();
+    const qs = urlParams.toString();
     return qs ? `/products?${qs}` : "/products";
   }
 
@@ -75,90 +83,16 @@ export default async function ProductsPage({
 
       <h1 className={styles.title}>Productos</h1>
 
-      <details className={styles.filtersDrawer}>
-        <summary className={styles.filtersBtn}>
-          ☰ Filtros
-          <span className={styles.filtersState}>
-            {condition !== "all" ? ` • ${condition}` : ""}
-            {category !== "all" ? ` • ${category}` : ""}
-          </span>
-        </summary>
-
-        <div className={styles.filtersPanel}>
-          <div className={styles.filterRow}>
-            <span className={styles.filterLabel}>Condición:</span>
-
-            <Link
-              className={`${styles.filterPill} ${
-                condition === "all" ? styles.activePill : ""
-              }`}
-              href={buildUrl({ page: 1, condition: "all", category })}
-            >
-              Todos
-            </Link>
-
-            <Link
-              className={`${styles.filterPill} ${
-                condition === "nuevo" ? styles.activePill : ""
-              }`}
-              href={buildUrl({ page: 1, condition: "nuevo", category })}
-            >
-              Nuevos
-            </Link>
-
-            <Link
-              className={`${styles.filterPill} ${
-                condition === "usado" ? styles.activePill : ""
-              }`}
-              href={buildUrl({ page: 1, condition: "usado", category })}
-            >
-              Usados
-            </Link>
-
-            <Link
-              className={`${styles.filterPill} ${
-                condition === "remanufacturado" ? styles.activePill : ""
-              }`}
-              href={buildUrl({
-                page: 1,
-                condition: "remanufacturado",
-                category,
-              })}
-            >
-              Remanufacturado
-            </Link>
-          </div>
-
-          <div className={styles.filterRow}>
-            <span className={styles.filterLabel}>Categoría:</span>
-
-            <Link
-              className={`${styles.filterPill} ${
-                category === "all" ? styles.activePill : ""
-              }`}
-              href={buildUrl({ page: 1, condition, category: "all" })}
-            >
-              Todas
-            </Link>
-
-            {categories.map((c) => (
-              <Link
-                key={c.id}
-                className={`${styles.filterPill} ${
-                  category === c.slug ? styles.activePill : ""
-                }`}
-                href={buildUrl({ page: 1, condition, category: c.slug })}
-              >
-                {c.name}
-              </Link>
-            ))}
-          </div>
-
-          <div className={styles.resultsInfo}>
-            Mostrando {total} producto(s)
-          </div>
-        </div>
-      </details>
+      <ProductsFilters
+        condition={condition}
+        category={category}
+        vehicleType={vehicleType}
+        total={total}
+        conditionOptions={filtersMeta.conditions}
+        vehicleTypeOptions={filtersMeta.vehicleTypes}
+        categoryTree={filtersMeta.categories}
+        buildUrl={buildUrl}
+      />
 
       <div className={styles.grid}>
         {visible.map((p) => (
@@ -186,14 +120,21 @@ export default async function ProductsPage({
       </div>
 
       {total === 0 && (
-        <div className={styles.empty}>No hay productos para esos filtros.</div>
+        <div className={styles.empty}>
+          Si el producto no aparece en catalogo pregunte por WhatsAap.
+        </div>
       )}
 
       <div className={styles.pagination}>
         {prevPage ? (
           <Link
             className={styles.pageBtn}
-            href={buildUrl({ page: prevPage, condition, category })}
+            href={buildUrl({
+              page: prevPage,
+              condition,
+              category,
+              vehicleType,
+            })}
           >
             ← Anterior
           </Link>
@@ -208,7 +149,12 @@ export default async function ProductsPage({
         {nextPage ? (
           <Link
             className={styles.pageBtn}
-            href={buildUrl({ page: nextPage, condition, category })}
+            href={buildUrl({
+              page: nextPage,
+              condition,
+              category,
+              vehicleType,
+            })}
           >
             Siguiente →
           </Link>

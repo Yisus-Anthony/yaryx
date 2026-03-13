@@ -226,7 +226,9 @@
     margin-top: 14px;
     padding: 12px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(84, 29, 29, 0.303);
+
+    font-size: 20px;
 }
 
 .price {

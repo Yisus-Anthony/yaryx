@@ -76,6 +76,10 @@ model Category {
   slug     String  @unique @db.VarChar(160)
   isActive Boolean @default(true)
 
+  parentId String?
+  parent   Category?  @relation("CategoryToChildren", fields: [parentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  children Category[] @relation("CategoryToChildren")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -84,6 +88,7 @@ model Category {
   @@index([slug])
   @@index([isActive])
   @@index([createdAt])
+  @@index([parentId])
 }
 
 model Product {
@@ -105,8 +110,9 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  vehicleTypes     ProductVehicleType[]
 
   @@index([slug])
   @@index([categoryId])
@@ -233,6 +239,30 @@ model OrderItem {
   @@index([orderId])
   @@index([productId])
   @@index([productSlug])
+}
+model VehicleType {
+  id        String   @id @default(cuid())
+  name      String   @unique @db.VarChar(120)
+  slug      String   @unique @db.VarChar(160)
+  isActive  Boolean  @default(true)
+
+  products  ProductVehicleType[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model ProductVehicleType {
+  productId     String
+  vehicleTypeId String
+
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  vehicleType   VehicleType @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+
+  @@id([productId, vehicleTypeId])
+  @@index([vehicleTypeId])
 }
 
 model Payment {

@@ -1,0 +1,220 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.allButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: flex-start;
+    min-height: 40px;
+    padding: 0.65rem 0.95rem;
+    border-radius: 999px;
+    text-decoration: none;
+    border: 1px solid #dbe1ea;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: 700;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.allButton:hover {
+    transform: translateY(-1px);
+    background: #e9eef5;
+    border-color: #cdd6e3;
+}
+
+.parentList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.parentItem {
+    position: relative;
+}
+
+.parentButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0.7rem 1rem;
+    border-radius: 14px;
+    text-decoration: none;
+    border: 1px solid #dbe1ea;
+    background: #ffffff;
+    color: #111827;
+    font-weight: 700;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.parentButton:hover {
+    transform: translateY(-1px);
+    background: #f9fafb;
+    border-color: #cfd8e3;
+}
+
+.parentItem {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+}
+
+/* puente invisible entre botón y panel */
+.parentItem::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 100%;
+    height: 14px;
+}
+
+.desktopDropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: max-content;
+    min-width: 320px;
+    max-width: 520px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease,
+        visibility 0.18s ease;
+    z-index: 40;
+}
+
+.parentItem:hover .desktopDropdown,
+.parentItem:focus-within .desktopDropdown,
+.desktopDropdown:hover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.dropdownCard {
+    padding: 1rem;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+}
+
+.group+.group {
+    margin-top: 0.9rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid #eef2f7;
+}
+
+.childLink {
+    display: inline-block;
+    margin-bottom: 0.45rem;
+    text-decoration: none;
+    color: #111827;
+    font-weight: 800;
+}
+
+.childLink:hover {
+    color: #000000;
+}
+
+.subList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.subChip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 999px;
+    text-decoration: none;
+    background: #f3f4f6;
+    border: 1px solid #dbe1ea;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.subChip:hover {
+    background: #e9eef5;
+    border-color: #cdd6e3;
+}
+
+.active {
+    background: #111827 !important;
+    color: #ffffff !important;
+    border-color: #111827 !important;
+}
+
+.activeText {
+    color: #111827;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.mobileDropdown {
+    display: none;
+}
+
+.mobileSummary {
+    margin-top: 0.5rem;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.mobilePanel {
+    margin-top: 0.7rem;
+    padding: 0.85rem;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+    .allButton {
+        width: 100%;
+    }
+
+    .parentList {
+        flex-direction: column;
+    }
+
+    .parentItem {
+        width: 100%;
+    }
+
+    .parentButton {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .desktopDropdown {
+        display: none;
+    }
+
+    .mobileDropdown {
+        display: block;
+    }
+}

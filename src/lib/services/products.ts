@@ -1,117 +1,229 @@
-import prisma from "@/lib/prisma";
-import { retry } from "@/lib/retry";
 import { Prisma, ProductCondition } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
-export const DEFAULT_PAGE_SIZE = 20;
-export const MAX_PAGE_SIZE = 50;
-
-export type GetProductsParams = {
+type GetProductsParams = {
     page?: number;
-    pageSize?: number;
     condition?: string;
     category?: string;
+    vehicleType?: string;
 };
 
-const conditionMap: Record<string, ProductCondition> = {
-    NEW: ProductCondition.NEW,
-    NUEVO: ProductCondition.NEW,
-    NUEVOS: ProductCondition.NEW,
-
-    USED: ProductCondition.USED,
-    USADO: ProductCondition.USED,
-    USADOS: ProductCondition.USED,
-
-    REFURBISHED: ProductCondition.REFURBISHED,
-    REMANUFACTURADO: ProductCondition.REFURBISHED,
-    REMANUFACTURADOS: ProductCondition.REFURBISHED,
+type CategoryTreeNode = {
+    id: string;
+    name: string;
+    slug: string;
+    children: CategoryTreeNode[];
 };
+
+const PAGE_SIZE = 12;
+
+const CONDITION_ORDER = ["nuevo", "usado", "remanufacturado"] as const;
+
+const CONDITION_TO_ENUM: Record<string, ProductCondition> = {
+    nuevo: ProductCondition.NEW,
+    usado: ProductCondition.USED,
+    remanufacturado: ProductCondition.REFURBISHED,
+};
+
+const ENUM_TO_CONDITION: Record<ProductCondition, string> = {
+    NEW: "nuevo",
+    USED: "usado",
+    REFURBISHED: "remanufacturado",
+};
+
+const CONDITION_LABELS: Record<string, string> = {
+    nuevo: "Nuevo",
+    usado: "Usado",
+    remanufacturado: "Remanufacturado",
+};
+
+function normalizePage(page?: number): number {
+    if (!page || !Number.isFinite(page) || page < 1) return 1;
+    return Math.floor(page);
+}
+
+async function getCategoryIdsFromTree(slug: string): Promise<string[]> {
+    const root = await prisma.category.findFirst({
+        where: {
+            slug,
+            isActive: true,
+        },
+        select: {
+            id: true,
+            children: {
+                where: { isActive: true },
+                select: {
+                    id: true,
+                    children: {
+                        where: { isActive: true },
+                        select: { id: true },
+                    },
+                },
+            },
+        },
+    });
+
+    if (!root) return [];
+
+    return [
+        root.id,
+        ...root.children.map((child) => child.id),
+        ...root.children.flatMap((child) => child.children.map((sub) => sub.id)),
+    ];
+}
 
 export async function getProducts({
     page = 1,
-    pageSize = DEFAULT_PAGE_SIZE,
     condition = "all",
     category = "all",
+    vehicleType = "all",
 }: GetProductsParams) {
-    const safePage = Math.max(1, Number(page) || 1);
-    const safePageSize = Math.min(
-        MAX_PAGE_SIZE,
-        Math.max(1, Number(pageSize) || DEFAULT_PAGE_SIZE)
-    );
-
-    const normalizedCondition = condition.trim().toUpperCase();
-    const normalizedCategory = category.trim().toLowerCase();
+    const safePage = normalizePage(page);
 
     const where: Prisma.ProductWhereInput = {
         isActive: true,
     };
 
-    if (normalizedCondition !== "ALL") {
-        const mappedCondition = conditionMap[normalizedCondition];
-
-        if (!mappedCondition) {
-            throw new Error(`Invalid condition: ${condition}`);
-        }
-
-        where.condition = mappedCondition;
+    if (condition !== "all" && CONDITION_TO_ENUM[condition]) {
+        where.condition = CONDITION_TO_ENUM[condition];
     }
 
-    if (normalizedCategory !== "all") {
-        where.category = {
-            is: {
-                slug: normalizedCategory,
+    if (category !== "all") {
+        const categoryIds = await getCategoryIdsFromTree(category);
+
+        if (categoryIds.length === 0) {
+            where.categoryId = "__no_match__";
+        } else {
+            where.categoryId = { in: categoryIds };
+        }
+    }
+
+    if (vehicleType !== "all") {
+        where.vehicleTypes = {
+            some: {
+                vehicleType: {
+                    slug: vehicleType,
+                    isActive: true,
+                },
             },
         };
     }
 
-    const [total, items] = await Promise.all([
-        retry(() => prisma.product.count({ where })),
-        retry(() =>
-            prisma.product.findMany({
-                where,
-                orderBy: { updatedAt: "desc" },
-                skip: (safePage - 1) * safePageSize,
-                take: safePageSize,
-                select: {
-                    id: true,
-                    slug: true,
-                    name: true,
-                    folder: true,
-                    coverPublicId: true,
-                    condition: true,
-                    categoryId: true,
-                    category: {
-                        select: {
-                            id: true,
-                            name: true,
-                            slug: true,
-                        },
-                    },
-                    price: true,
-                    stock: true,
-                    createdAt: true,
-                    updatedAt: true,
-                },
-            })
-        ),
-    ]);
+    const total = await prisma.product.count({ where });
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const currentPage = Math.min(safePage, totalPages);
+
+    const items = await prisma.product.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (currentPage - 1) * PAGE_SIZE,
+        take: PAGE_SIZE,
+        select: {
+            id: true,
+            slug: true,
+            name: true,
+            price: true,
+            coverPublicId: true,
+        },
+    });
 
     return {
         items,
-        page: safePage,
-        pageSize: safePageSize,
         total,
-        totalPages: Math.max(1, Math.ceil(total / safePageSize)),
+        page: currentPage,
+        totalPages,
     };
 }
 
-export async function getProductCategories() {
-    return prisma.category.findMany({
-        where: { isActive: true },
-        orderBy: { name: "asc" },
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-        },
-    });
+export async function getProductFiltersMeta() {
+    const [conditionsRaw, vehicleTypesRaw, categoryRoots] = await Promise.all([
+        prisma.product.groupBy({
+            by: ["condition"],
+            where: {
+                isActive: true,
+            },
+        }),
+
+        prisma.vehicleType.findMany({
+            where: {
+                isActive: true,
+                products: {
+                    some: {
+                        product: {
+                            isActive: true,
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                name: "asc",
+            },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+            },
+        }),
+
+        prisma.category.findMany({
+            where: {
+                isActive: true,
+                parentId: null,
+            },
+            orderBy: {
+                name: "asc",
+            },
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                children: {
+                    where: {
+                        isActive: true,
+                    },
+                    orderBy: {
+                        name: "asc",
+                    },
+                    select: {
+                        id: true,
+                        name: true,
+                        slug: true,
+                        children: {
+                            where: {
+                                isActive: true,
+                            },
+                            orderBy: {
+                                name: "asc",
+                            },
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                            },
+                        },
+                    },
+                },
+            },
+        }),
+    ]);
+
+    const conditions = conditionsRaw
+        .map((item) => {
+            const value = ENUM_TO_CONDITION[item.condition];
+            return {
+                value,
+                label: CONDITION_LABELS[value] ?? value,
+            };
+        })
+        .sort(
+            (a, b) =>
+                CONDITION_ORDER.indexOf(a.value as (typeof CONDITION_ORDER)[number]) -
+                CONDITION_ORDER.indexOf(b.value as (typeof CONDITION_ORDER)[number])
+        );
+
+    return {
+        conditions,
+        vehicleTypes: vehicleTypesRaw,
+        categories: categoryRoots as CategoryTreeNode[],
+    };
 }
