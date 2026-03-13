@@ -36,8 +36,8 @@ export default function HomePage() {
 
       <div className={styles.grid}>
         <article className={styles.surface}>
-          <h3>Conoce nuestros motores de arranque</h3>
-          <p>a los mejores precios nuevos y usados</p>
+          <h3>Marchas de para reconstruir</h3>
+          <p>a los mejores precios </p>
         </article>
         <article className={styles.surface}>
           <h3>Hasta 50 % de descuento</h3>
