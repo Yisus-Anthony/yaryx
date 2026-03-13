@@ -10,6 +10,7 @@ type GetProductsParams = {
 
 type CategoryTreeNode = {
     id: string;
+    sku: string;
     name: string;
     slug: string;
     children: CategoryTreeNode[];

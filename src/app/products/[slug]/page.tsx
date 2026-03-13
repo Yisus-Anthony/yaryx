@@ -12,6 +12,8 @@ type PageProps = {
 type Product = {
   id: string;
   name: string;
+  sku: string | null;
+  price: number;
 };
 
 type ProductResponse = {
@@ -49,6 +51,21 @@ export default async function ProductDetail({ params }: PageProps) {
       </Link>
 
       <h1 className={styles.title}>{product.name}</h1>
+
+      {product.sku ? (
+        <p className={styles.subtitle}>SKU: {product.sku}</p>
+      ) : null}
+
+      <p
+        style={{
+          fontSize: "22px",
+          fontWeight: 700,
+          margin: "8px 0 16px",
+        }}
+      >
+        ${Number(product.price).toLocaleString("es-MX")}
+      </p>
+
       <p className={styles.subtitle}>Galería de fotos</p>
 
       <ProductGallery slug={slug} />

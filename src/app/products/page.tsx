@@ -12,7 +12,12 @@ type SearchParams = {
 };
 
 type ProductsPageProps = {
-  searchParams?: Promise<SearchParams>;
+  searchParams?: {
+    page?: string;
+    condition?: string;
+    category?: string;
+    vehicleType?: string;
+  };
 };
 
 type BuildUrlParams = {
@@ -30,7 +35,7 @@ function cldUrl(publicId: string): string {
 export default async function ProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  const params = (await searchParams) ?? {};
+  const params = searchParams ?? {};
 
   const pageParam = Number(params.page ?? "1");
   const page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
@@ -121,7 +126,7 @@ export default async function ProductsPage({
 
       {total === 0 && (
         <div className={styles.empty}>
-          Si el producto no aparece en catalogo pregunte por WhatsAap.
+          Si el producto no aparece en catálogo, pregunte por WhatsApp.
         </div>
       )}
 

@@ -93,6 +93,7 @@ model Category {
 
 model Product {
   id            String           @id @default(cuid())
+  sku           String?          @unique @db.VarChar(80)
   slug          String           @unique @db.VarChar(160)
   name          String           @db.VarChar(200)
   description   String?          @db.Text
@@ -110,10 +111,11 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  cartItems        CartItem[]
-  orderItems       OrderItem[]
-  vehicleTypes     ProductVehicleType[]
+  cartItems    CartItem[]
+  orderItems   OrderItem[]
+  vehicleTypes ProductVehicleType[]
 
+  @@index([sku])
   @@index([slug])
   @@index([categoryId])
   @@index([condition])
@@ -355,4 +357,22 @@ model ContactMessage {
 
   @@index([email])
   @@index([createdAt])
+}
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?  @db.VarChar(120)
+  email        String   @unique @db.VarChar(191)
+  passwordHash String   @db.VarChar(255)
+  role         UserRole @default(CUSTOMER)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([role])
+  @@index([isActive])
 }
