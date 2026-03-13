@@ -40,7 +40,27 @@ type ProductsFiltersProps = {
   buildUrl: (next: BuildUrlParams) => string;
 };
 
-function findCategoryName(nodes: CategoryNode[], slug: string): string | null {
+function normalizeCategoryTree(nodes: unknown): CategoryNode[] {
+  if (!Array.isArray(nodes)) return [];
+
+  return nodes.map((node) => {
+    const item = node as Partial<CategoryNode>;
+
+    return {
+      id: typeof item.id === "string" ? item.id : "",
+      name: typeof item.name === "string" ? item.name : "",
+      slug: typeof item.slug === "string" ? item.slug : "",
+      children: normalizeCategoryTree(item.children),
+    };
+  });
+}
+
+function findCategoryName(
+  nodes: CategoryNode[] | null | undefined,
+  slug: string,
+): string | null {
+  if (!Array.isArray(nodes) || !slug || slug === "all") return null;
+
   for (const node of nodes) {
     if (node.slug === slug) return node.name;
 
@@ -74,13 +94,15 @@ export default function ProductsFilters({
   categoryTree,
   buildUrl,
 }: ProductsFiltersProps) {
+  const safeCategoryTree = normalizeCategoryTree(categoryTree);
+
   const selectedCondition =
     conditionOptions.find((item) => item.value === condition)?.label ?? "";
 
   const selectedVehicleType =
     vehicleTypeOptions.find((item) => item.slug === vehicleType)?.name ?? "";
 
-  const selectedCategory = findCategoryName(categoryTree, category) ?? "";
+  const selectedCategory = findCategoryName(safeCategoryTree, category) ?? "";
 
   const filtersCount = activeFiltersCount({
     condition,
@@ -137,7 +159,7 @@ export default function ProductsFilters({
             {vehicleType !== "all" && (
               <span className={styles.activeToken}>{selectedVehicleType}</span>
             )}
-            {category !== "all" && (
+            {category !== "all" && selectedCategory && (
               <span className={styles.activeToken}>{selectedCategory}</span>
             )}
           </div>
@@ -220,7 +242,7 @@ export default function ProductsFilters({
             </div>
 
             <CategoryMenu
-              categoryTree={categoryTree}
+              categoryTree={safeCategoryTree}
               activeCategory={category}
               condition={condition}
               vehicleType={vehicleType}
