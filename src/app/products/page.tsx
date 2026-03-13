@@ -7,6 +7,7 @@ import { getProductFiltersMeta, getProducts } from "@/lib/services/products";
 type ProductsPageProps = {
   searchParams?: {
     page?: string;
+    q?: string;
     condition?: string;
     category?: string;
     vehicleType?: string;
@@ -15,6 +16,7 @@ type ProductsPageProps = {
 
 type BuildUrlParams = {
   page?: number;
+  q?: string;
   condition?: string;
   category?: string;
   vehicleType?: string;
@@ -68,12 +70,13 @@ export default async function ProductsPage({
   const parsedPage = Number(params.page ?? "1");
   const page = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
+  const q = (params.q ?? "").trim();
   const condition = (params.condition ?? "all").toLowerCase();
   const category = (params.category ?? "all").toLowerCase();
   const vehicleType = (params.vehicleType ?? "all").toLowerCase();
 
   const [data, filtersMeta] = await Promise.all([
-    getProducts({ page, condition, category, vehicleType }),
+    getProducts({ page, q, condition, category, vehicleType }),
     getProductFiltersMeta(),
   ]);
 
@@ -88,20 +91,30 @@ export default async function ProductsPage({
   function buildUrl(next: BuildUrlParams): string {
     const urlParams = new URLSearchParams();
 
-    if (next.page && next.page > 1) {
-      urlParams.set("page", String(next.page));
+    const nextPage = next.page;
+    const nextQ = next.q ?? q;
+    const nextCondition = next.condition ?? condition;
+    const nextVehicleType = next.vehicleType ?? vehicleType;
+    const nextCategory = next.category ?? category;
+
+    if (nextPage && nextPage > 1) {
+      urlParams.set("page", String(nextPage));
     }
 
-    if (next.condition && next.condition !== "all") {
-      urlParams.set("condition", next.condition);
+    if (nextQ.trim()) {
+      urlParams.set("q", nextQ.trim());
     }
 
-    if (next.vehicleType && next.vehicleType !== "all") {
-      urlParams.set("vehicleType", next.vehicleType);
+    if (nextCondition !== "all") {
+      urlParams.set("condition", nextCondition);
     }
 
-    if (next.category && next.category !== "all") {
-      urlParams.set("category", next.category);
+    if (nextVehicleType !== "all") {
+      urlParams.set("vehicleType", nextVehicleType);
+    }
+
+    if (nextCategory !== "all") {
+      urlParams.set("category", nextCategory);
     }
 
     const qs = urlParams.toString();
@@ -119,6 +132,7 @@ export default async function ProductsPage({
       <h1 className={styles.title}>Productos</h1>
 
       <ProductsFilters
+        q={q}
         condition={condition}
         category={category}
         vehicleType={vehicleType}
@@ -156,7 +170,8 @@ export default async function ProductsPage({
 
       {total === 0 && (
         <div className={styles.empty}>
-          Si el producto no aparece en catálogo, pregunte por WhatsApp.
+          No encontramos productos con los filtros o búsqueda actual. Si el
+          producto no aparece en catálogo, pregunte por WhatsApp.
         </div>
       )}
 
@@ -165,12 +180,7 @@ export default async function ProductsPage({
           {prevPage ? (
             <Link
               className={styles.pageBtn}
-              href={buildUrl({
-                page: prevPage,
-                condition,
-                category,
-                vehicleType,
-              })}
+              href={buildUrl({ page: prevPage })}
             >
               ← Anterior
             </Link>
@@ -192,12 +202,7 @@ export default async function ProductsPage({
                 <Link
                   key={item}
                   className={styles.pageBtn}
-                  href={buildUrl({
-                    page: item,
-                    condition,
-                    category,
-                    vehicleType,
-                  })}
+                  href={buildUrl({ page: item })}
                 >
                   {item}
                 </Link>
@@ -208,12 +213,7 @@ export default async function ProductsPage({
           {nextPage ? (
             <Link
               className={styles.pageBtn}
-              href={buildUrl({
-                page: nextPage,
-                condition,
-                category,
-                vehicleType,
-              })}
+              href={buildUrl({ page: nextPage })}
             >
               Siguiente →
             </Link>

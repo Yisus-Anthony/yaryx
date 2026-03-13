@@ -22,12 +22,14 @@ type CategoryNode = {
 
 type BuildUrlParams = {
   page?: number;
+  q?: string;
   condition?: string;
   category?: string;
   vehicleType?: string;
 };
 
 type ProductsFiltersProps = {
+  q: string;
   condition: string;
   category: string;
   vehicleType: string;
@@ -62,6 +64,7 @@ function activeFiltersCount(params: {
 }
 
 export default function ProductsFilters({
+  q,
   condition,
   category,
   vehicleType,
@@ -85,129 +88,157 @@ export default function ProductsFilters({
     category,
   });
 
+  const hasSearch = q.trim().length > 0;
+
   return (
-    <details className={styles.filtersDrawer}>
-      <summary className={styles.filtersBtn}>
-        <div className={styles.filtersBtnLeft}>
-          <span className={styles.filtersIcon}>☰</span>
-          <span>Filtros</span>
-          {filtersCount > 0 && (
-            <span className={styles.filtersBadge}>{filtersCount}</span>
-          )}
-        </div>
-
-        <div className={styles.filtersState}>
-          {condition !== "all" && (
-            <span className={styles.activeToken}>{selectedCondition}</span>
-          )}
-          {vehicleType !== "all" && (
-            <span className={styles.activeToken}>{selectedVehicleType}</span>
-          )}
-          {category !== "all" && (
-            <span className={styles.activeToken}>{selectedCategory}</span>
-          )}
-        </div>
-      </summary>
-
-      <div className={styles.filtersPanel}>
-        <div className={styles.filterSection}>
-          <div className={styles.filterHeader}>
-            <h3 className={styles.filterTitle}>Condición</h3>
-          </div>
-
-          <div className={styles.pillsWrap}>
-            <Link
-              className={`${styles.filterChip} ${
-                condition === "all" ? styles.filterChipActive : ""
-              }`}
-              href={buildUrl({ page: 1, condition: "all", vehicleType, category })}
-            >
-              Todo
-            </Link>
-
-            {conditionOptions.map((item) => (
-              <Link
-                key={item.value}
-                className={`${styles.filterChip} ${
-                  condition === item.value ? styles.filterChipActive : ""
-                }`}
-                href={buildUrl({
-                  page: 1,
-                  condition: item.value,
-                  vehicleType,
-                  category,
-                })}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className={styles.filterSection}>
-          <div className={styles.filterHeader}>
-            <h3 className={styles.filterTitle}>Tipo de vehículo</h3>
-          </div>
-
-          <div className={styles.pillsWrap}>
-            <Link
-              className={`${styles.filterChip} ${
-                vehicleType === "all" ? styles.filterChipActive : ""
-              }`}
-              href={buildUrl({ page: 1, condition, vehicleType: "all", category })}
-            >
-              Todo
-            </Link>
-
-            {vehicleTypeOptions.length > 0 ? (
-              vehicleTypeOptions.map((item) => (
-                <Link
-                  key={item.id}
-                  className={`${styles.filterChip} ${
-                    vehicleType === item.slug ? styles.filterChipActive : ""
-                  }`}
-                  href={buildUrl({
-                    page: 1,
-                    condition,
-                    vehicleType: item.slug,
-                    category,
-                  })}
-                >
-                  {item.name}
-                </Link>
-              ))
-            ) : (
-              <span className={styles.emptyInline}>
-                No hay tipos de vehículo asociados a productos.
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.filterSection}>
-          <div className={styles.filterHeader}>
-            <h3 className={styles.filterTitle}>Categorías</h3>
-          </div>
-
-          <CategoryMenu
-            categoryTree={categoryTree}
-            activeCategory={category}
-            condition={condition}
-            vehicleType={vehicleType}
-            buildUrl={buildUrl}
+    <div className={styles.filtersBlock}>
+      <form method="GET" action="/products" className={styles.searchBar}>
+        <div className={styles.searchInputWrap}>
+          <span className={styles.searchIcon}>⌕</span>
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            placeholder="Buscar por nombre, SKU o slug..."
+            className={styles.searchInput}
           />
         </div>
 
-        <div className={styles.footerBar}>
-          <div className={styles.resultsInfo}>
-            Mostrando <strong>{total}</strong> producto(s)
+        {condition !== "all" && (
+          <input type="hidden" name="condition" value={condition} />
+        )}
+        {vehicleType !== "all" && (
+          <input type="hidden" name="vehicleType" value={vehicleType} />
+        )}
+        {category !== "all" && (
+          <input type="hidden" name="category" value={category} />
+        )}
+
+        <button type="submit" className={styles.searchBtn}>
+          Buscar
+        </button>
+      </form>
+
+      <details className={styles.filtersDrawer}>
+        <summary className={styles.filtersBtn}>
+          <div className={styles.filtersBtnLeft}>
+            <span className={styles.filtersIcon}>☰</span>
+            <span>Filtros</span>
+            {filtersCount > 0 && (
+              <span className={styles.filtersBadge}>{filtersCount}</span>
+            )}
           </div>
 
-          <Link className={styles.clearBtn} href="/products">
-            Limpiar filtros
-          </Link>
+          <div className={styles.filtersState}>
+            {hasSearch && <span className={styles.activeToken}>“{q}”</span>}
+            {condition !== "all" && (
+              <span className={styles.activeToken}>{selectedCondition}</span>
+            )}
+            {vehicleType !== "all" && (
+              <span className={styles.activeToken}>{selectedVehicleType}</span>
+            )}
+            {category !== "all" && (
+              <span className={styles.activeToken}>{selectedCategory}</span>
+            )}
+          </div>
+        </summary>
+
+        <div className={styles.filtersPanel}>
+          <div className={styles.filterSection}>
+            <div className={styles.filterHeader}>
+              <h3 className={styles.filterTitle}>Condición</h3>
+            </div>
+
+            <div className={styles.pillsWrap}>
+              <Link
+                className={`${styles.filterChip} ${
+                  condition === "all" ? styles.filterChipActive : ""
+                }`}
+                href={buildUrl({ page: 1, condition: "all" })}
+              >
+                Todo
+              </Link>
+
+              {conditionOptions.map((item) => (
+                <Link
+                  key={item.value}
+                  className={`${styles.filterChip} ${
+                    condition === item.value ? styles.filterChipActive : ""
+                  }`}
+                  href={buildUrl({
+                    page: 1,
+                    condition: item.value,
+                  })}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className={styles.filterSection}>
+            <div className={styles.filterHeader}>
+              <h3 className={styles.filterTitle}>Tipo de vehículo</h3>
+            </div>
+
+            <div className={styles.pillsWrap}>
+              <Link
+                className={`${styles.filterChip} ${
+                  vehicleType === "all" ? styles.filterChipActive : ""
+                }`}
+                href={buildUrl({ page: 1, vehicleType: "all" })}
+              >
+                Todo
+              </Link>
+
+              {vehicleTypeOptions.length > 0 ? (
+                vehicleTypeOptions.map((item) => (
+                  <Link
+                    key={item.id}
+                    className={`${styles.filterChip} ${
+                      vehicleType === item.slug ? styles.filterChipActive : ""
+                    }`}
+                    href={buildUrl({
+                      page: 1,
+                      vehicleType: item.slug,
+                    })}
+                  >
+                    {item.name}
+                  </Link>
+                ))
+              ) : (
+                <span className={styles.emptyInline}>
+                  No hay tipos de vehículo asociados a productos.
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.filterSection}>
+            <div className={styles.filterHeader}>
+              <h3 className={styles.filterTitle}>Categorías</h3>
+            </div>
+
+            <CategoryMenu
+              categoryTree={categoryTree}
+              activeCategory={category}
+              condition={condition}
+              vehicleType={vehicleType}
+              buildUrl={buildUrl}
+            />
+          </div>
+
+          <div className={styles.footerBar}>
+            <div className={styles.resultsInfo}>
+              Mostrando <strong>{total}</strong> producto(s)
+            </div>
+
+            <Link className={styles.clearBtn} href="/products">
+              Limpiar filtros
+            </Link>
+          </div>
         </div>
-      </div>
-    </details>
+      </details>
+    </div>
   );
 }

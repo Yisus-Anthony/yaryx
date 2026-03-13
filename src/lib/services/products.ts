@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 
 type GetProductsParams = {
     page?: number;
+    q?: string;
     condition?: string;
     category?: string;
     vehicleType?: string;
@@ -75,15 +76,40 @@ async function getCategoryIdsFromTree(slug: string): Promise<string[]> {
 
 export async function getProducts({
     page = 1,
+    q = "",
     condition = "all",
     category = "all",
     vehicleType = "all",
 }: GetProductsParams) {
     const safePage = normalizePage(page);
+    const normalizedQuery = q.trim();
 
     const where: Prisma.ProductWhereInput = {
         isActive: true,
     };
+
+    if (normalizedQuery) {
+        where.OR = [
+            {
+                name: {
+                    contains: normalizedQuery,
+                    mode: "insensitive",
+                },
+            },
+            {
+                slug: {
+                    contains: normalizedQuery,
+                    mode: "insensitive",
+                },
+            },
+            {
+                sku: {
+                    contains: normalizedQuery,
+                    mode: "insensitive",
+                },
+            },
+        ];
+    }
 
     if (condition !== "all" && CONDITION_TO_ENUM[condition]) {
         where.condition = CONDITION_TO_ENUM[condition];
@@ -123,6 +149,7 @@ export async function getProducts({
             id: true,
             slug: true,
             name: true,
+            sku: true,
             price: true,
             coverPublicId: true,
         },
@@ -220,7 +247,7 @@ export async function getProductFiltersMeta() {
         .sort(
             (a, b) =>
                 CONDITION_ORDER.indexOf(a.value as (typeof CONDITION_ORDER)[number]) -
-                CONDITION_ORDER.indexOf(b.value as (typeof CONDITION_ORDER)[number])
+                CONDITION_ORDER.indexOf(b.value as (typeof CONDITION_ORDER)[number]),
         );
 
     return {
