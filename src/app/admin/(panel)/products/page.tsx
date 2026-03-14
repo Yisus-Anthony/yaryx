@@ -2,6 +2,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import styles from "./styles.module.css";
 import ProductsToolbar from "./_components/ProductsToolbar";
+import type { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -16,46 +17,58 @@ type ProductsPageProps = {
   };
 };
 
-function getSortOrder(sort?: string) {
+function getSortOrder(sort?: string): Prisma.ProductOrderByWithRelationInput[] {
   switch (sort) {
     case "name-asc":
-      return [{ name: "asc" as const }];
+      return [{ name: "asc" }];
     case "name-desc":
-      return [{ name: "desc" as const }];
+      return [{ name: "desc" }];
     case "price-asc":
-      return [{ price: "asc" as const }];
+      return [{ price: "asc" }];
     case "price-desc":
-      return [{ price: "desc" as const }];
+      return [{ price: "desc" }];
     case "updated-asc":
-      return [{ updatedAt: "asc" as const }];
+      return [{ updatedAt: "asc" }];
     case "updated-desc":
     default:
-      return [{ updatedAt: "desc" as const }];
+      return [{ updatedAt: "desc" }];
   }
+}
+
+function cldUrl(publicId?: string | null) {
+  if (!publicId) return null;
+
+  const cloud =
+    process.env.CLOUDINARY_CLOUD_NAME ||
+    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+
+  if (!cloud) return null;
+
+  return `https://res.cloudinary.com/${cloud}/image/upload/f_auto,q_auto,w_120,h_120,c_fill/${publicId}`;
 }
 
 export default async function AdminProductsPage({
   searchParams,
 }: ProductsPageProps) {
-  const currentPage = Math.max(1, Number(searchParams?.page ?? "1") || 1);
+  const requestedPage = Math.max(1, Number(searchParams?.page ?? "1") || 1);
   const query = searchParams?.q?.trim() ?? "";
   const category = searchParams?.category?.trim() ?? "";
   const sort = searchParams?.sort?.trim() ?? "updated-desc";
 
-  const where = {
+  const where: Prisma.ProductWhereInput = {
     ...(query
       ? {
           OR: [
-            { name: { contains: query, mode: "insensitive" as const } },
-            { sku: { contains: query, mode: "insensitive" as const } },
-            { slug: { contains: query, mode: "insensitive" as const } },
+            { name: { contains: query, mode: "insensitive" } },
+            { sku: { contains: query, mode: "insensitive" } },
+            { slug: { contains: query, mode: "insensitive" } },
           ],
         }
       : {}),
     ...(category ? { categoryId: category } : {}),
   };
 
-  const [categories, totalItems, items] = await Promise.all([
+  const [categories, totalItems] = await Promise.all([
     prisma.category.findMany({
       orderBy: { name: "asc" },
       select: {
@@ -64,31 +77,34 @@ export default async function AdminProductsPage({
       },
     }),
     prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy: getSortOrder(sort),
-      skip: (currentPage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
-      include: {
-        category: true,
-        vehicleTypes: {
-          include: {
-            vehicleType: true,
-          },
-        },
-      },
-    }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+
+  const items = await prisma.product.findMany({
+    where,
+    orderBy: getSortOrder(sort),
+    skip: (currentPage - 1) * PAGE_SIZE,
+    take: PAGE_SIZE,
+    include: {
+      category: true,
+      vehicleTypes: {
+        include: {
+          vehicleType: true,
+        },
+      },
+    },
+  });
 
   const buildPageHref = (page: number) => {
+    const safePage = Math.max(1, Math.min(page, totalPages));
     const params = new URLSearchParams();
 
     if (query) params.set("q", query);
     if (category) params.set("category", category);
     if (sort) params.set("sort", sort);
-    params.set("page", String(page));
+    params.set("page", String(safePage));
 
     return `/admin/products?${params.toString()}`;
   };
@@ -149,80 +165,94 @@ export default async function AdminProductsPage({
 
             <tbody>
               {items.length ? (
-                items.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <div className={styles.productCell}>
-                        <div className={styles.productAvatar}>
-                          {p.name.charAt(0).toUpperCase()}
-                        </div>
+                items.map((p) => {
+                  const imageUrl = cldUrl(p.coverPublicId);
 
-                        <div className={styles.productMeta}>
-                          <span className={styles.productName}>{p.name}</span>
-                          <span className={styles.productId}>ID: {p.id}</span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span className={styles.mono}>{p.sku ?? "—"}</span>
-                    </td>
-
-                    <td>
-                      <span className={styles.mono}>{p.slug}</span>
-                    </td>
-
-                    <td>
-                      <span className={styles.categoryBadge}>
-                        {p.category.name}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className={styles.statusBadge}>{p.condition}</span>
-                    </td>
-
-                    <td>
-                      {p.vehicleTypes.length ? (
-                        <div className={styles.vehicleList}>
-                          {p.vehicleTypes.slice(0, 2).map((item) => (
-                            <span
-                              key={`${p.id}-${item.vehicleType.name}`}
-                              className={styles.vehicleBadge}
-                            >
-                              {item.vehicleType.name}
-                            </span>
-                          ))}
-
-                          {p.vehicleTypes.length > 2 && (
-                            <span className={styles.moreBadge}>
-                              +{p.vehicleTypes.length - 2}
-                            </span>
+                  return (
+                    <tr key={p.id}>
+                      <td>
+                        <div className={styles.productCell}>
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={p.name}
+                              className={styles.productAvatarImage}
+                            />
+                          ) : (
+                            <div className={styles.productAvatar}>
+                              {p.name.charAt(0).toUpperCase()}
+                            </div>
                           )}
+
+                          <div className={styles.productMeta}>
+                            <span className={styles.productName}>{p.name}</span>
+                            <span className={styles.productId}>ID: {p.id}</span>
+                          </div>
                         </div>
-                      ) : (
-                        <span className={styles.emptyText}>—</span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className={styles.alignRight}>
-                      <span className={styles.price}>
-                        ${p.price.toLocaleString("es-MX")}
-                      </span>
-                    </td>
+                      <td>
+                        <span className={styles.mono}>{p.sku ?? "—"}</span>
+                      </td>
 
-                    <td className={styles.alignRight}>
-                      <div className={styles.rowActions}>
-                        <Link
-                          href={`/admin/products/${p.id}`}
-                          className={styles.secondaryButton}
-                        >
-                          Editar
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td>
+                        <span className={styles.mono}>{p.slug}</span>
+                      </td>
+
+                      <td>
+                        <span className={styles.categoryBadge}>
+                          {p.category.name}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span className={styles.statusBadge}>
+                          {p.condition}
+                        </span>
+                      </td>
+
+                      <td>
+                        {p.vehicleTypes.length ? (
+                          <div className={styles.vehicleList}>
+                            {p.vehicleTypes.slice(0, 2).map((item) => (
+                              <span
+                                key={`${p.id}-${item.vehicleType.name}`}
+                                className={styles.vehicleBadge}
+                              >
+                                {item.vehicleType.name}
+                              </span>
+                            ))}
+
+                            {p.vehicleTypes.length > 2 && (
+                              <span className={styles.moreBadge}>
+                                +{p.vehicleTypes.length - 2}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className={styles.emptyText}>—</span>
+                        )}
+                      </td>
+
+                      <td className={styles.alignRight}>
+                        <span className={styles.price}>
+                          ${p.price.toLocaleString("es-MX")}
+                        </span>
+                      </td>
+
+                      <td className={styles.alignRight}>
+                        <div className={styles.rowActions}>
+                          <Link
+                            href={`/admin/products/${p.id}`}
+                            className={styles.secondaryButton}
+                          >
+                            Editar
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan={8}>

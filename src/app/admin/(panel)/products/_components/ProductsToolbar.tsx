@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import styles from "../styles.module.css";
 
@@ -27,6 +27,7 @@ export default function ProductsToolbar({
   const searchParams = useSearchParams();
 
   const [search, setSearch] = useState(initialQuery);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     setSearch(initialQuery);
@@ -43,8 +44,13 @@ export default function ProductsToolbar({
   );
 
   useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
 
       if (search.trim()) {
         params.set("q", search.trim());
@@ -59,7 +65,7 @@ export default function ProductsToolbar({
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [search, pathname, router, searchParams]);
+  }, [search, pathname, router]);
 
   const handleCategoryChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
