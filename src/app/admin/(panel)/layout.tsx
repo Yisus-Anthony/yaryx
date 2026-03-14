@@ -1,22 +1,49 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
+import Link from "next/link";
+import { signOut } from "@/lib/auth";
 
-type AdminPanelLayoutProps = {
-  children: React.ReactNode;
-};
-
-export default async function AdminPanelLayout({
+export default function AdminPanelLayout({
   children,
-}: AdminPanelLayoutProps) {
-  const session = await auth();
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <header
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 24px",
+          borderBottom: "1px solid #e5e7eb",
+          background: "#fff",
+        }}
+      >
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <Link href="/admin/products">Admin</Link>
+        </div>
 
-  if (!session?.user) {
-    redirect("/admin/login");
-  }
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/admin/login" });
+          }}
+        >
+          <button
+            type="submit"
+            style={{
+              padding: "10px 14px",
+              borderRadius: 10,
+              border: "1px solid #d1d5db",
+              background: "#fff",
+              cursor: "pointer",
+            }}
+          >
+            Cerrar sesión
+          </button>
+        </form>
+      </header>
 
-  if (session.user.role !== "ADMIN") {
-    redirect("/admin/login");
-  }
-
-  return <>{children}</>;
+      <div>{children}</div>
+    </section>
+  );
 }
