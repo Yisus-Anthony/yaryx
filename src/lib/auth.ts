@@ -24,10 +24,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 },
             },
             async authorize(credentials) {
-                const email = String(credentials?.email ?? "")
-                    .trim()
-                    .toLowerCase();
-
+                const email = String(credentials?.email ?? "").trim().toLowerCase();
                 const password = String(credentials?.password ?? "");
 
                 if (!email || !password) {
@@ -43,6 +40,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         role: true,
                         isActive: true,
                         passwordHash: true,
+                        sessionVersion: true,
                     },
                 });
 
@@ -63,7 +61,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    role: user.role,
+                    role: String(user.role),
+                    sessionVersion: user.sessionVersion,
                 };
             },
         }),
@@ -73,6 +72,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.sub = String(user.id);
                 token.role = String((user as { role?: string }).role ?? "");
+                token.sessionVersion = Number(
+                    (user as { sessionVersion?: number }).sessionVersion ?? 1
+                );
             }
 
             return token;
@@ -82,6 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (session.user) {
                 session.user.id = String(token.sub ?? "");
                 session.user.role = String(token.role ?? "");
+                session.user.sessionVersion = Number(token.sessionVersion ?? 1);
             }
 
             return session;
