@@ -125,3 +125,16 @@
     max-width: 22ch;
   }
 }
+
+.surface {
+  position: relative;
+  height: 200px;
+}
+
+.surface img {
+  transition: transform .4s ease;
+}
+
+.surface:hover img {
+  transform: scale(1.08);
+}

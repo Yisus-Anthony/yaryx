@@ -1,3 +1,4 @@
+import Image from "next/image";
 import styles from "./page.module.css";
 import ButtonLink from "../components/ui/ButtonLink/ButtonLink";
 
@@ -33,22 +34,47 @@ export default function HomePage() {
           </div>*/}
         </div>
       </div>
-
       <div className={styles.grid}>
         <article className={styles.surface}>
-          <h3>Marchas de para reconstruir</h3>
-          <p>a los mejores precios </p>
+          <Image
+            src="/images/marchas.png"
+            alt="Marchas para reconstruir"
+            fill
+            style={{ objectFit: "cover" }}
+          />
+
+          <div className={styles.overlay}>
+            <h3>Marchas para reconstruir</h3>
+            <p>a los mejores precios</p>
+          </div>
         </article>
+
         <article className={styles.surface}>
-          <h3>Hasta 50 % de descuento</h3>
-          <p>
-            Pongase en contacto con nosotros y pregunte acerca de los
-            descuentos.
-          </p>
+          <Image
+            src="/images/servicio-electrico.png"
+            alt="Servicio eléctrico automotriz"
+            fill
+            style={{ objectFit: "cover" }}
+          />
+
+          <div className={styles.overlay}>
+            <h3>Servicio eléctrico</h3>
+            <p>diagnóstico y reparación</p>
+          </div>
         </article>
+
         <article className={styles.surface}>
-          <h3>Alternadores</h3>
-          <p>a los mejores precios nuevos y usados.</p>
+          <Image
+            src="/images/alternadores.png"
+            alt="Alternadores nuevos y usados"
+            fill
+            style={{ objectFit: "cover" }}
+          />
+
+          <div className={styles.overlay}>
+            <h3>Alternadores</h3>
+            <p>nuevos y usados</p>
+          </div>
         </article>
       </div>
     </section>
