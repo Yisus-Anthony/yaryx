@@ -86,6 +86,8 @@ export default async function AdminPanelLayout({
           </span>
         </div>
 
+        <Link href="/admin/inventory">Inventario</Link>
+
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <form action={handleSignOutAllDevices}>
             <button
