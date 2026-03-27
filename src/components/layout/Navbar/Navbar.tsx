@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 import ButtonLink from "../../ui/ButtonLink/ButtonLink";
@@ -25,17 +26,23 @@ export default function Navbar() {
     <header className={styles.header}>
       <div className={styles.inner}>
         <Link className={styles.brand} href="/" onClick={() => setOpen(false)}>
-          Tu Refaccionaria
+          <Image
+            src="/logo.png"
+            alt="Tu Refaccionaria"
+            width={40}
+            height={40}
+            priority
+            className={styles.brandLogo}
+          />
+          <span className={styles.brandText}>Tu Refaccionaria</span>
         </Link>
 
-        {/* NAV desktop */}
         <nav className={styles.nav} aria-label="Primary navigation">
           <Link className={styles.navLink} href="/about">
             Nosotros
           </Link>
         </nav>
 
-        {/* Acciones desktop */}
         <div className={styles.actions}>
           <CartBadge />
           <ButtonLink href="/contact" variant="ghost">
@@ -43,7 +50,6 @@ export default function Navbar() {
           </ButtonLink>
         </div>
 
-        {/* Mobile actions */}
         <div className={styles.mobileActions}>
           <CartBadge />
 
@@ -59,7 +65,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Menú mobile */}
         <div
           id="mobile-menu"
           className={`${styles.mobileMenu} ${
